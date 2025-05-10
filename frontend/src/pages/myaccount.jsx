@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { FaUser, FaEnvelope, FaInstagram, FaTiktok } from "react-icons/fa";
+import config from "../config";
+import { toast } from "react-toastify"; // 👈 Import toast
+import "react-toastify/dist/ReactToastify.css";
+import Cookies from "js-cookie";
 
-const MyAccount = ({ user, onSave }) => {
+const MyAccount = ({ user }) => {
   const [socialLinks, setSocialLinks] = useState({
     instagramId: user.instagramId || "",
     tiktokId: user.tiktokId || "",
@@ -10,12 +14,38 @@ const MyAccount = ({ user, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setSocialLinks(prev => ({ ...prev, [name]: value }));
+    setSocialLinks((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    if (onSave) onSave(socialLinks);
-  };
+  const handleSave = async () => {
+  try {
+    const token = Cookies.get("token") || localStorage.getItem("token");
+    const response = await fetch(`${config.BACKEND_URL}/user/campaigns/update-social`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token, // ✅ token
+      },
+      body: JSON.stringify(socialLinks),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      toast.success(data.message || "Social links updated successfully!" ,{ theme: "dark" });
+
+      // Update local user object (for instant UI update)
+  user.instagramId = socialLinks.instagramId;
+  user.tiktokId = socialLinks.tiktokId;
+    } else {
+      toast.error(data.message || "Failed to update social links.", { theme: "dark" });
+    }
+  } catch (error) {
+    console.error("Save error:", error);
+    toast.error("Something went wrong while saving.");
+  }
+};
+
 
   return (
     <div className="min-h-[50] bg-black flex justify-center p-6">
