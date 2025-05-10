@@ -1,45 +1,68 @@
 import { Link, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import  { useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import ReCAPTCHA from "react-google-recaptcha";
 import config from "../config";
+import RecaptchaBox from "../components/RecaptchaBox";
 
 export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const Navigate = useNavigate();
+  const recaptchaRef = useRef();
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name");
-    const email = formData.get("email");
-    const password = formData.get("password");
+const handleFormSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    if (!recaptchaToken) {
-      toast.error("Please complete reCAPTCHA", { theme: "dark" });
-      return setLoading(false);
-    }
+  const formData = new FormData(e.currentTarget);
+  const name = formData.get("name");
+  const email = formData.get("email");
+  const password = formData.get("password");
 
+  // 🛡️ Validate reCAPTCHA token
+  if (!recaptchaToken) {
+    toast.error("Please complete the reCAPTCHA", { theme: "dark" });
+    setLoading(false);
+    return;
+  }
+
+  try {
+    // 📡 Submit form data along with reCAPTCHA token
     const res = await fetch(`${config.BACKEND_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        recaptchaToken, // ✅ send token
+      }),
     });
 
     const data = await res.json();
+
     if (data.status === "success") {
       toast.success("Verification link sent to your email", { theme: "dark" });
       Navigate("/signin");
     } else {
-      toast.error(data.message, { theme: "dark" });
+      toast.error(data.message || "Signup failed", { theme: "dark" });
     }
+  } catch (err) {
+    console.error("Signup error:", err);
+    toast.error("Something went wrong. Please try again.", { theme: "dark" });
+  } finally {
+    // 🔁 Reset reCAPTCHA and clear token
+    recaptchaRef.current?.resetCaptcha(); // ✅ If using RecaptchaBox component
+    setRecaptchaToken("");
     setLoading(false);
-  };
+  }
+};
+
+
 
   const handleGoogleSignup = async (decoded) => {
     try {
@@ -81,10 +104,11 @@ export default function Signup() {
           <input name="email" type="email" placeholder="Email" required className="w-full p-2 rounded bg-gray-700 text-white" />
           <input name="password" type="password" placeholder="Password" required className="w-full p-2 rounded bg-gray-700 text-white" />
 
-          <ReCAPTCHA
-            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-            onChange={(token) => setRecaptchaToken(token)}
-          />
+          <RecaptchaBox
+  ref={recaptchaRef}
+  onTokenChange={(token) => setRecaptchaToken(token)}
+/>
+
 
           <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white p-2 rounded mt-2">
             {loading ? "Submitting..." : "Sign Up"}

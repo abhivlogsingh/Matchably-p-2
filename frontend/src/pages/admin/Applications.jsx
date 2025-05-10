@@ -108,6 +108,7 @@ export default function ViewApplicants() {
               <th className="px-4 py-2 text-left">Name</th>
               <th className="px-4 py-2 text-left">Email</th>
               <th className="px-4 py-2 text-left">Joined</th>
+              <th className="px-4 py-2 text-left">Verified email</th>
               <th className="px-4 py-2 text-center">Blocked</th>
               <th className="px-4 py-2 text-center">Actions</th>
             </tr>
@@ -118,6 +119,7 @@ export default function ViewApplicants() {
                 <td className="px-4 py-2">{user.name}</td>
                 <td className="px-4 py-2">{user.email}</td>
                 <td className="px-4 py-2">{user.joinedAt.split('T')[0]}</td>
+                 <td className="px-4 py-2">{user.isVerified ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2 text-center">
                   {user.blocked ? 'Yes' : 'No'}
                 </td>
