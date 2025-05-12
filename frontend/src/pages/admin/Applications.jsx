@@ -12,7 +12,7 @@ export default function ViewApplicants() {
 	const [lastCursor, setLastCursor] = useState(null);
 	const [hasMore, setHasMore] = useState(false);
 	const [loading, setLoading] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
 	const token = Cookies.get('AdminToken');
 
 	// Fetch initial page of users
@@ -102,8 +102,20 @@ export default function ViewApplicants() {
 					content='noindex, nofollow'
 				/>
 			</Helmet>
+      <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4'>
+  <h2 className='text-xl font-semibold text-white'>
+    Registered Users - {applications.length}
+  </h2>
 
-			<h2 className='text-xl mb-4'>Registered Users</h2>
+  <input
+    type='text'
+    placeholder='Search by name or email...'
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className='w-full md:w-80 px-4 py-2 rounded bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500'
+  />
+</div>
+
 			<div className='overflow-x-auto bg-[#202020] rounded-lg'>
 				<table className='min-w-full divide-y divide-gray-700'>
 					<thead className='bg-gray-800'>
@@ -117,7 +129,14 @@ export default function ViewApplicants() {
 						</tr>
 					</thead>
 					<tbody className='divide-y divide-gray-700'>
-						{applications.map((user) => (
+          {applications
+  .filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .map((user) => (
+
 							<tr
 								key={user.id}
 								className='hover:bg-gray-700'
