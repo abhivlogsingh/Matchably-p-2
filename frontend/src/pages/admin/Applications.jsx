@@ -6,6 +6,7 @@ import axios from 'axios';
 import config from '../../config';
 import { Helmet } from 'react-helmet';
 import { FaLock, FaUnlock, FaTrashAlt } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 
 export default function ViewApplicants() {
 	const [applications, setApplications] = useState([]);
@@ -69,6 +70,28 @@ export default function ViewApplicants() {
 			alert('Failed to delete user.');
 		}
 	};
+
+  const handleVerifyChange = async (userId, value) => {
+    try {
+      const res = await axios.patch(
+        `${config.BACKEND_URL}/admin/users/${userId}/verify`,
+        { isVerified: value === 'yes' },
+        { headers: { authorization: token } }
+      );
+      if (res.data.status === 'success') {
+        setApplications((prev) =>
+          prev.map((u) =>
+            u.id === userId ? { ...u, isVerified: value === 'yes' } : u
+          )
+        );
+        toast.success("Verification status updated successfully.", {  theme: "dark" });
+      }
+    } catch (err) {
+      console.error('Error updating verification status:', err);
+      toast.error("Failed to update verification status.", { theme: "dark"});
+    }
+  };
+  
 
 	// Toggle blocked status
 	const handleToggleBlock = async (userId) => {
@@ -144,17 +167,20 @@ export default function ViewApplicants() {
 								<td className='px-4 py-2'>{user.name}</td>
 								<td className='px-4 py-2'>{user.email}</td>
 								<td className='px-4 py-2'>{user.joinedAt.split('T')[0]}</td>
-								<td className='px-4 py-2'>
-									<span
-										className={
-											user.isVerified
-												? 'text-green-600 font-semibold'
-												: 'text-red-600 font-semibold'
-										}
-									>
-										{user.isVerified ? 'Yes' : 'No'}
-									</span>
-								</td>
+								<td className="px-4 py-2">
+  <select
+    value={user.isVerified ? 'yes' : 'no'}
+    onChange={(e) => handleVerifyChange(user.id, e.target.value)}
+    className={`px-3 py-1 rounded border font-semibold text-white
+      ${user.isVerified ? 'bg-green-600 border-green-700' : 'bg-red-600 border-red-700'}
+      hover:opacity-90 transition duration-200`}
+  >
+    <option value="yes" className="text-black">Yes</option>
+    <option value="no" className="text-black">No</option>
+  </select>
+</td>
+
+
 								<td className='px-4 py-2 text-center'>
 									{user.blocked ? 'Yes' : 'No'}
 								</td>
