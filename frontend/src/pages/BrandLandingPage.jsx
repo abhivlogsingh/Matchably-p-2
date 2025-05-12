@@ -28,58 +28,99 @@ const BrandLandingPage = () => {
 			</Helmet>
 
 			{/* Hero Section */}
-			<section className='flex flex-col items-center justify-center text-center py-20 px-4'>
-				<h1 className='text-3xl md:text-5xl font-bold mb-4'>
-				  Launch Your UGC Campaign — Fast, Authentic, and Affordable.
-				</h1>
-				<p className='text-lg md:text-2xl mb-8 leading-relaxed'>
-				Connect with real creators and get impactful user-generated content that builds trust and drives results.
-				</p>
-				<Link to='/campaigns'><a				
-					className='relative group inline-block px-10 py-5 text-lg font-semibold rounded-xl bg-gradient-to-r from-green-400 to-blue-400 text-black transition-all duration-300 transform hover:scale-110 hover:shadow-[0_0_30px_#00ffcc] hover:from-green-300 hover:to-blue-300'
-				>
-					<span className='absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-gradient-to-r from-green-400 to-blue-400 z-[-1]'></span>
-					🚀 Launch Your Campaign
-				</a>
-				</Link>
-			</section>
+			<section className='flex flex-col items-center justify-center text-center py-20 px-4 bg-black text-white'>
+  {/* Headline */}
+  <h1 className='text-3xl md:text-5xl font-bold mb-4'>
+    Launch Your UGC Campaign in 7 Days — or Less.
+  </h1>
+
+  {/* Subtext */}
+  <p className='text-lg md:text-xl mb-8 leading-relaxed text-gray-300'>
+    High-quality. Affordable. Hassle-free.
+  </p>
+
+  {/* Key Badges as Cards */}
+  <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 w-full max-w-5xl'>
+    {[
+      {
+        icon: '💰',
+        text: 'Starts from just $199',
+      },
+      {
+        icon: '🎯',
+        text: 'Quality Guaranteed (we review and reject poor content)',
+      },
+      {
+        icon: '📧',
+        text: 'No complex dashboard — managed via simple email',
+      },
+    ].map((item, idx) => (
+      <div
+        key={idx}
+        className='flex flex-col items-center text-center p-6 rounded-xl border border-gray-700 bg-[#111] shadow-lg transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-blue-500/40'
+      >
+        <div className='text-3xl mb-3'>{item.icon}</div>
+        <p className='text-base md:text-lg text-gray-300 font-medium'>{item.text}</p>
+      </div>
+    ))}
+  </div>
+
+  {/* CTA Button */}
+  <a
+    href='mailto:info@matchably.kr'
+    className='relative group inline-block px-10 py-5 text-lg font-semibold rounded-xl bg-gradient-to-r from-green-400 to-blue-400 text-black transition-all duration-300 transform hover:scale-110 hover:shadow-[0_0_30px_#00ffcc] hover:from-green-300 hover:to-blue-300'
+    aria-label='Start My Campaign'
+  >
+    <span className='absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl bg-gradient-to-r from-green-400 to-blue-400 z-[-1]'></span>
+    🚀 Start My Campaign
+  </a>
+</section>
+
 			<Devider />
 
 			{/* Comparison Section */}
-			<section className='py-20 px-4 max-w-5xl mx-auto'>
-				<h2 className='text-3xl font-bold text-center mb-8'>
-					Why Brands Choose Matchably
-				</h2>
-				<div className='overflow-x-auto'>
-					<table className='min-w-full border-collapse'>
-						<thead>
-							<tr className='border-b border-gray-700'>
-								<th className='py-4 text-left text-lg font-semibold'>
-									Feature
-								</th>
-								<th className='py-4 text-center text-lg font-semibold'>
-									Matchably
-								</th>
-								<th className='py-4 text-center text-lg font-semibold'>
-									Traditional Platforms
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							{features.map((text, idx) => (
-								<tr
-									key={idx}
-									className='border-b border-gray-800'
-								>
-									<td className='py-4 text-[18px] leading-relaxed'>{text}</td>
-									<td className='py-4 text-lg text-center text-green-400'>✅</td>
-									<td className='py-4 text-lg text-center text-red-500'>❌</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			</section>
+			<section className='py-20 px-4 max-w-6xl mx-auto'>
+  <h2 className='text-3xl md:text-4xl font-bold text-center mb-12'>
+    Why Brands Choose Matchably
+  </h2>
+
+  <div className='grid gap-8 md:grid-cols-3'>
+    {[
+      {
+        pain: '“The content quality was so poor, I couldn\'t even use it.”',
+        solution:
+          'Matchably reviews all submissions and requests reshoots if quality is poor.',
+      },
+      {
+        pain: '“It took over a week just to find creators.”',
+        solution:
+          'We complete creator matching within 7 days, and launch fast.',
+      },
+      {
+        pain: '“I was told it would cost over $1,000 just to start.”',
+        solution:
+          'Matchably campaigns start from $199, no hidden fees.',
+      },
+    ].map((item, idx) => (
+      <div
+        key={idx}
+        className='bg-[#111] text-white rounded-xl p-6 shadow-lg border border-gray-700 hover:shadow-[0_0_25px_#00ffcc] transition-all duration-300'
+      >
+        <p className='text-red-400 text-lg mb-4'>
+          ❗ <span className='italic'> {item.pain} </span>
+        </p>
+        <p className='text-green-400 text-md font-medium'>
+          💡 {item.solution}
+        </p>
+      </div>
+    ))}
+  </div>
+
+  <p className='text-center mt-12 text-xl md:text-2xl font-semibold text-white'>
+    👉 If any of this sounds familiar, <span className='text-green-400'>Matchably is built for you.</span>
+  </p>
+</section>
+
 			<Devider />
 
 			{/* Why Consumers Trust UGC */}
@@ -135,18 +176,18 @@ const BrandLandingPage = () => {
 					{[
 						{
 							icon: '✉️',
-							title: 'Send Your Campaign by Email',
-							desc: 'Share product info, target audience, and timeline.',
+							title: 'Email Us Your Campaign Info',
+							desc: 'Just send your product details, quantity of content, and your target audience.',
 						},
 						{
 							icon: '🚀',
-							title: 'We Launch Your Campaign',
-							desc: 'Your campaign is posted to our creator network.',
+							title: 'Creator Matching Within 7 Days',
+							desc: 'We select the best creators internally and launch immediately.',
 						},
 						{
 							icon: '📸',
-							title: 'Receive Authentic UGC',
-							desc: 'Creators apply, receive products, and deliver content.',
+							title: 'Receive High-Quality, Reviewed Content',
+							desc: 'Only approved content is delivered. We reject anything that doesn’t meet our standard.',
 						},
 					].map((step, i) => (
 						<div
@@ -165,27 +206,56 @@ const BrandLandingPage = () => {
 			<Devider />
 
 			{/* Pricing Section */}
-			<section className='py-15 px-4 max-w-2xl mx-auto text-center'>
-				<h2 className='text-5xl font-bold mb-6'>Pricing</h2>
-				<p className='text-3xl font-extrabold text-green-400 mb-2'>$500</p>
-				<p className='text-lg font-medium mb-2'>Simple and straightforward.</p>
-				<p className='text-sm text-gray-400'>Most brands start here.</p>
-			</section>
+			<section className='py-20 px-4 max-w-6xl mx-auto text-center'>
+  <h2 className='text-4xl md:text-5xl font-bold mb-12'>What Our Clients Say</h2>
+
+  <div className='grid md:grid-cols-2 gap-8'>
+    {[
+      {
+        quote:
+          'Can’t believe we got this level of content for just $199.',
+        author: '— Marketing Manager, Skincare Co.',
+      },
+      {
+        quote:
+          'First time working with a platform that actually rejects low-quality content.',
+        author: '— DTC Brand Owner',
+      },
+    ].map((item, idx) => (
+      <div
+        key={idx}
+        className='bg-[#111] text-white p-6 rounded-xl shadow-lg border border-gray-700 hover:shadow-[0_0_25px_#00ffcc] transition-all duration-300'
+      >
+        <p className='text-xl leading-relaxed italic mb-4'>“{item.quote}”</p>
+        <p className='text-sm text-green-400 font-medium'>{item.author}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
 			<Devider />
 
 			{/* Final CTA */}
 			<section className='py-20 px-4 text-center bg-gradient-to-r from-black to-[#040014]'>
-				<h2 className='text-4xl md:text-5xl font-bold mb-15 text-white transition-all duration-300 hover:tracking-wider'>
-					Ready to Launch?
-				</h2>
+  <h2 className='text-4xl md:text-5xl font-bold mb-6 text-white transition-all duration-300 hover:tracking-wider'>
+    Start your $199 Campaign Today
+  </h2>
+  <p className='text-xl md:text-2xl text-gray-300 mb-10'>
+    Get 20+ creator-made videos — <span className='text-green-400 font-semibold'>quality guaranteed</span>.
+  </p>
 
-				<a
-					href='mailto:info@matchably.kr'
-					className='inline-block px-10 py-5 text-lg font-semibold rounded-lg bg-gradient-to-r from-green-400 to-blue-400 text-black shadow-lg transition-all duration-300 ease-in-out transform hover:scale-110 hover:shadow-[0_0_25px_#00ffff] hover:-translate-y-1'
-				>
-					📩 Email us at: <span className='font-bold'>info@matchably.kr</span>
-				</a>
-			</section>
+  <a
+    href='mailto:info@matchably.kr'
+    className='inline-block px-10 py-5 text-lg font-semibold rounded-xl bg-gradient-to-r from-green-400 to-blue-400 text-black shadow-xl transition-all duration-300 transform hover:scale-110 hover:shadow-[0_0_35px_#00ffff] hover:-translate-y-1'
+  >
+    📩 Start My Campaign
+  </a>
+
+  <p className='mt-6 text-gray-400 text-sm'>
+    Or email us directly at <a href='mailto:info@matchably.kr' className='text-green-400 underline'>info@matchably.kr</a>
+  </p>
+</section>
+
 		</div>
 	);
 };
