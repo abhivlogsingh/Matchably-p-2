@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import useAuthStore from "../state/atoms";
 import { Helmet } from "react-helmet";
 import { GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from "jwt-decode";
 
 export default function Signin() {
   const { setSignin, verifyLogin } = useAuthStore();
@@ -16,14 +15,14 @@ export default function Signin() {
   const HandleSignIn = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email");
     const password = formData.get("password");
-  
+
     const res = await SignInFunction({ email, password });
     const { status, message } = res;
-  
+
     if (status === "success") {
       toast.success(message, { theme: "dark" });
       verifyLogin();
@@ -34,23 +33,20 @@ export default function Signin() {
     } else {
       toast.error(message || "Login failed", { theme: "dark" });
     }
-  
+
     setLoading(false);
   };
-  
 
-  const handleGoogleLogin = async (decoded) => {
+  const handleGoogleLogin = async (idToken) => {
     try {
       const res = await fetch(`${config.BACKEND_URL}/auth/google-auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: decoded.email,
-          name: decoded.name,
-        }),
+        body: JSON.stringify({ idToken }),
       });
 
       const data = await res.json();
+
       if (data.status === "success") {
         localStorage.setItem("token", data.token);
         toast.success("Login successful via Google", { theme: "dark" });
@@ -95,8 +91,8 @@ export default function Signin() {
         <div className="mt-6 flex justify-center items-center">
           <GoogleLogin
             onSuccess={(credentialResponse) => {
-              const decoded = jwtDecode(credentialResponse.credential);
-              handleGoogleLogin(decoded);
+              const idToken = credentialResponse.credential;
+              handleGoogleLogin(idToken);
             }}
             onError={() => {
               toast.error("Google Login Failed", { theme: "dark" });

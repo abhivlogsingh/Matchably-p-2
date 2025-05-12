@@ -1,10 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import  { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
-import ReCAPTCHA from "react-google-recaptcha";
 import config from "../config";
 import RecaptchaBox from "../components/RecaptchaBox";
 
@@ -14,65 +12,57 @@ export default function Signup() {
   const Navigate = useNavigate();
   const recaptchaRef = useRef();
 
-const handleFormSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const formData = new FormData(e.currentTarget);
-  const name = formData.get("name");
-  const email = formData.get("email");
-  const password = formData.get("password");
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name");
+    const email = formData.get("email");
+    const password = formData.get("password");
 
-  // 🛡️ Validate reCAPTCHA token
-  if (!recaptchaToken) {
-    toast.error("Please complete the reCAPTCHA", { theme: "dark" });
-    setLoading(false);
-    return;
-  }
-
-  try {
-    // 📡 Submit form data along with reCAPTCHA token
-    const res = await fetch(`${config.BACKEND_URL}/auth/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        recaptchaToken, // ✅ send token
-      }),
-    });
-
-    const data = await res.json();
-
-    if (data.status === "success") {
-      toast.success("Verification link sent to your email", { theme: "dark" });
-      Navigate("/signin");
-    } else {
-      toast.error(data.message || "Signup failed", { theme: "dark" });
+    if (!recaptchaToken) {
+      toast.error("Please complete the reCAPTCHA", { theme: "dark" });
+      setLoading(false);
+      return;
     }
-  } catch (err) {
-    console.error("Signup error:", err);
-    toast.error("Something went wrong. Please try again.", { theme: "dark" });
-  } finally {
-    // 🔁 Reset reCAPTCHA and clear token
-    recaptchaRef.current?.resetCaptcha(); // ✅ If using RecaptchaBox component
-    setRecaptchaToken("");
-    setLoading(false);
-  }
-};
 
+    try {
+      const res = await fetch(`${config.BACKEND_URL}/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          recaptchaToken,
+        }),
+      });
 
+      const data = await res.json();
 
-  const handleGoogleSignup = async (decoded) => {
+      if (data.status === "success") {
+        toast.success("Verification link sent to your email", { theme: "dark" });
+        Navigate("/signin");
+      } else {
+        toast.error(data.message || "Signup failed", { theme: "dark" });
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      toast.error("Something went wrong. Please try again.", { theme: "dark" });
+    } finally {
+      recaptchaRef.current?.resetCaptcha();
+      setRecaptchaToken("");
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async (idToken) => {
     try {
       const res = await fetch(`${config.BACKEND_URL}/auth/google-auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: decoded.email,
-          name: decoded.name,
-        }),
+        body: JSON.stringify({ idToken }),
       });
 
       const data = await res.json();
@@ -105,10 +95,9 @@ const handleFormSubmit = async (e) => {
           <input name="password" type="password" placeholder="Password" required className="w-full p-2 rounded bg-gray-700 text-white" />
 
           <RecaptchaBox
-  ref={recaptchaRef}
-  onTokenChange={(token) => setRecaptchaToken(token)}
-/>
-
+            ref={recaptchaRef}
+            onTokenChange={(token) => setRecaptchaToken(token)}
+          />
 
           <button type="submit" disabled={loading} className="w-full bg-indigo-600 text-white p-2 rounded mt-2">
             {loading ? "Submitting..." : "Sign Up"}
@@ -120,8 +109,8 @@ const handleFormSubmit = async (e) => {
         <div className="mt-3 flex justify-center">
           <GoogleLogin
             onSuccess={(credentialResponse) => {
-              const decoded = jwtDecode(credentialResponse.credential);
-              handleGoogleSignup(decoded);
+              const idToken = credentialResponse.credential;
+              handleGoogleSignup(idToken);
             }}
             onError={() => {
               toast.error("Google Login Failed", { theme: "dark" });
