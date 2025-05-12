@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useAuthStore from "../../state/atoms";
 import axios from "axios";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 import config from "../../config";
 import { toast } from "react-toastify";
 
@@ -78,53 +78,76 @@ export default function SubmitApplication({ isOpen, setIsOpen,setSuccess,campaig
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    setloading(true)
-    e.preventDefault();
-    if (
-      !formData.street ||
-      !formData.city ||
-      !formData.state ||
-      !formData.zip
-    ) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    console.log("Form submitted:", formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setloading(true);
 
-    try{
-        const token = Cookies.get("token") || localStorage.getItem("token");
-        const res = await axios.post(`${config.BACKEND_URL}/user/campaigns/apply`,{
-            state: formData.state,
-            city : formData.city,
-            phone : formData.phone,
-            address : formData.street,
-            zip : formData.zip,
-            campaignId,
-            instagramId: formData.instagramId,
-    tiktokId: formData.tiktokId,
-        },{
-            headers : {
-                authorization: token,
-            }
-        })
+  const { street, city, state, zip, instagramId, tiktokId } = formData;
 
-        if(res.data.status === "success"){
-            setIsOpen(false);
-            setSuccess(true)
-            console.log(res.data)
-        }
-    } catch (error) {
-      console.error(error);
-      const message = error?.response?.data?.message || "Something went wrong.";
-      toast.error(message, {
-        position: toast.POSITION.TOP_CENTER,
+  // 🔒 Validate address fields
+  if (!street || !city || !state || !zip) {
+    toast.error("Please fill in all address fields.", {
+      position: "top-center",
+    });
+    setloading(false);
+    return;
+  }
+
+  // 🔒 Validate at least one social ID
+  if (!instagramId.trim() && !tiktokId.trim()) {
+    toast.error("Please provide either Instagram ID or TikTok ID.", {
+      position: "top-center",
+    });
+    setloading(false);
+    return;
+  }
+
+  try {
+    const token = Cookies.get("token") || localStorage.getItem("token");
+
+    const res = await axios.post(
+      `${config.BACKEND_URL}/user/campaigns/apply`,
+      {
+        state,
+        city,
+        phone: formData.phone,
+        address: street,
+        zip,
+        campaignId,
+        instagramId,
+        tiktokId,
+      },
+      {
+        headers: {
+          authorization: token,
+        },
+      }
+    );
+
+    if (res.data.status === "success") {
+      setIsOpen(false);
+      setSuccess(true);
+      console.log(res.data);
+      toast.success("Application submitted successfully!", {
+        position: "top-center",
+      });
+    } else {
+      toast.error(res.data.message || "Application failed.", {
+        position: "top-center",
       });
     }
-    finally {
-        setloading(false)
-    }
-  };
+  } catch (error) {
+    console.error(error);
+    const message = error?.response?.data?.message || "Something went wrong.";
+    toast.error(message, {
+      position: "top-center",
+    });
+  } finally {
+    setloading(false);
+  }
+};
+
+
   return (
     <div
       className={`gap-[20px] fixed top-0 right-0 h-full bg-[#303030] text-white w-full md:w-[400px] transform ${
@@ -230,10 +253,7 @@ export default function SubmitApplication({ isOpen, setIsOpen,setSuccess,campaig
   className="w-full bg-[#575757] px-3 py-2 mb-3 rounded-md h-[60px] md:h-auto"
 />
 </div>
-<div className="mb-3">
-  <label htmlFor="street" className="block text-sm font-medium text-gray-300 mb-1">
-   State Select
-  </label>
+<div>
           <select
             name="state"
             value={formData.state}
