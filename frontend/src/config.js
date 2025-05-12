@@ -1,7 +1,5 @@
 const config = {
-    // BACKEND_URL : "https://matchably-backend.onrender.com",
-    BACKEND_URL : "http://localhost:2340/api",
-}
-//https://matchably-backend.onrender.com
-//http://localhost:2340
+    BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+};
+
 export default config;
