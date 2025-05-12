@@ -119,7 +119,11 @@ export default function ViewApplicants() {
                 <td className="px-4 py-2">{user.name}</td>
                 <td className="px-4 py-2">{user.email}</td>
                 <td className="px-4 py-2">{user.joinedAt.split('T')[0]}</td>
-                 <td className="px-4 py-2">{user.isVerified ? 'Yes' : 'No'}</td>
+                <td className="px-4 py-2">
+  <span className={user.isVerified ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+    {user.isVerified ? 'Yes' : 'No'}
+  </span>
+</td>
                 <td className="px-4 py-2 text-center">
                   {user.blocked ? 'Yes' : 'No'}
                 </td>
