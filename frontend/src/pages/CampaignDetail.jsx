@@ -29,6 +29,10 @@ const CampaignDetail = () => {
   const [tiktokUrls, setTiktokUrls] = useState("");
   const [allowReuse, setAllowReuse] = useState(false);
   const [appliedStatus, setAppliedStatus] = useState(""); // "Approved", "Rejected", "Pending", ""
+  const [applicantsCount, setApplicantsCount] = useState(0);
+const [appliedThisMonth, setAppliedThisMonth] = useState(0);
+const [campaignStatus, setCampaignStatus] = useState("Recruiting"); // or "Closed"
+
 
   useEffect(() => {
     if (appliedStatus === "Approved") {
@@ -106,58 +110,49 @@ const CampaignDetail = () => {
   }, [User, campaignId]);
 
   async function getUserApplicationStatus() {
-    try {
-      const token = Cookies.get("token") || localStorage.getItem("token");
-      const res = await axios.get(
-        `${config.BACKEND_URL}/user/campaigns/appliedCampaigns`,
-        {
-          headers: {
-            authorization: token,
-          },
-        }
-      );
+  try {
+    const token = Cookies.get("token") || localStorage.getItem("token");
+    const res = await axios.get(`${config.BACKEND_URL}/user/campaigns/appliedCampaigns`, {
+      headers: {
+        authorization: token,
+      },
+    });
 
-      console.log("API response from /appliedCampaigns:", res.data);
-
-      if (res.data.status === "success") {
-        const found = res.data.campaigns.find(
-          (c) => String(c.id) === String(campaignId)
-        );
-        console.log("Matched campaign:", found);
-
-        if (found) {
-          setAppliedStatus(found.applicationStatus);
-          console.log("Applied status set to:", found.applicationStatus);
-        } else {
-          console.log("Campaign not found in user's applied campaigns.");
-        }
-      } else {
-        console.log("API call succeeded but response.status !== 'success'");
+    if (res.data.status === "success") {
+      setAppliedThisMonth(res.data.appliedThisMonth || 0);
+      const found = res.data.campaigns.find(c => String(c.id) === String(campaignId));
+      if (found) {
+        setAppliedStatus(found.applicationStatus);
       }
-    } catch (err) {
-      console.error("Error fetching applied status:", err);
     }
+  } catch (err) {
+    console.error("Error fetching applied status:", err);
   }
+}
+
 
   useEffect(() => {
     getCampaign();
   }, [campaignId]);
 
-  async function getCampaign() {
-    try {
-      console.log(User.email);
-      const res = await axios.get(
-        `${config.BACKEND_URL}/user/campaigns/${campaignId}/${User.email}`
-      );
-      if (res.data.status === "success") {
-        setCampaign(res.data.campaign);
-      }
-    } catch {
-      // something
-    } finally {
-      setloading(false);
+ async function getCampaign() {
+  try {
+    const res = await axios.get(
+      `${config.BACKEND_URL}/user/campaigns/${campaignId}/${User.email}`
+    );
+    if (res.data.status === "success") {
+      const c = res.data.campaign;
+      setCampaign(c);
+      setApplicantsCount(res.data.applicantsCount || 0);
+      setCampaignStatus(res.data.campaignStatus || "Recruiting");
     }
+  } catch {
+    // error handling
+  } finally {
+    setloading(false);
   }
+}
+
 
   const handleOutsideClick = (e) => {
     if (e.target.id === "sidebar-overlay") {
@@ -299,11 +294,19 @@ const CampaignDetail = () => {
                 <strong>Deadline:</strong>{" "}
                 {campaign.deadline ? campaign.deadline.split("T")[0] : "N/A"}
               </p>
-              {campaign.recruiting > 0 && (
+              {/* {campaign.recruiting > 0 && (
                 <p className="text-[#d2d2d2] mt-[8px]">
                   <strong>Recruiting:</strong> {campaign.recruiting}
                 </p>
-              )}
+              )} */}
+              <p className="text-[#d2d2d2] mt-[8px]">
+  <strong>Applicants:</strong> {applicantsCount} / {campaign.recruiting || "N/A"}
+</p>
+<p className={`mt-2 font-semibold text-sm inline-block px-3 py-1 rounded-full 
+  ${campaignStatus === "Closed" ? "bg-red-600 text-white" : "bg-green-600 text-white"}`}>
+  {campaignStatus}
+</p>
+
               <div className="flex flex-wrap gap-[20px]">
                 {campaign.contentFormat?.map((content, index) => {
                   return (
@@ -357,7 +360,12 @@ const CampaignDetail = () => {
                   }
                   setIsOpen(true);
                 }}
-                disabled={!!appliedStatus}
+               disabled={
+  !!appliedStatus ||
+  campaignStatus === "Closed" ||
+  appliedThisMonth >= 5
+}
+
                 className={`w-full md:w-auto flex justify-center items-center font-semibold py-3 px-8 rounded-full transition-all duration-300 transform
     ${
       appliedStatus === "Approved"
@@ -370,12 +378,17 @@ const CampaignDetail = () => {
     } shadow-md`}
               >
                 {appliedStatus === "Approved"
-                  ? "Approved"
-                  : appliedStatus === "Rejected"
-                  ? "Rejected"
-                  : appliedStatus === "Pending"
-                  ? "Pending"
-                  : "Apply to this Campaign"}
+  ? "Approved"
+  : appliedStatus === "Rejected"
+  ? "Rejected"
+  : appliedStatus === "Pending"
+  ? "Pending"
+  : campaignStatus === "Closed"
+  ? "Campaign Closed"
+  : appliedThisMonth >= 5
+  ? "Limit Reached"
+  : "Apply to this Campaign"}
+
               </button>
             </div>
           </div>
