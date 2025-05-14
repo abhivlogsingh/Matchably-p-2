@@ -77,9 +77,15 @@ export default function Signin() {
           </div>
 
           <div>
-            <label htmlFor="password" className="text-sm text-gray-200 block">Password</label>
-            <input id="password" name="password" type="password" required minLength={6} className="w-full mt-2 rounded-md bg-[#ffffff29] px-3 py-1.5 text-base text-gray-300" />
-          </div>
+  <label htmlFor="password" className="text-sm text-gray-200 block">Password</label>
+  <input id="password" name="password" type="password" required minLength={6} className="w-full mt-2 rounded-md bg-[#ffffff29] px-3 py-1.5 text-base text-gray-300" />
+  <div className="text-right mt-1">
+    <Link to="/forgot-password" className="text-sm text-indigo-300 hover:underline">
+      Forgot password?
+    </Link>
+  </div>
+</div>
+
 
           <div>
             <button type="submit" disabled={loading} className={`w-full rounded-md px-3 py-1.5 text-sm font-semibold text-white shadow ${loading ? "bg-gray-500" : "bg-indigo-600"}`}>

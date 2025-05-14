@@ -35,6 +35,8 @@ import AboutUs from './pages/AboutUs';
 import BrandLandingPage from './pages/BrandLandingPage';
 import Influencer from './pages/influencer';
 import VerifyEmail from './pages/VerifyEmail';
+import ForgotPassword from "./pages/ForgotPassword";
+
 
 const URL = config.BACKEND_URL;
 
@@ -98,6 +100,7 @@ function Layout() {
 					path='campaigns'
 					element={<CampaignList />}
 				/>
+				<Route path="/forgot-password" element={<ForgotPassword />} />
 				<Route 
 				path='UserApplyCampaign'
 				element={

@@ -65,9 +65,14 @@ export default function EditCampaign({ setShowModal, index }) {
   const [error, setError] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCampaign({ ...campaign, [name]: value });
-  };
+  const { name, value } = e.target;
+  const isNumberField = ["recruiting"].includes(name);
+  setCampaign({ 
+    ...campaign, 
+    [name]: isNumberField ? Number(value) : value 
+  });
+};
+
 
   const handleHashtagsChange = (e) => {
     const inputValue = e.target.value;

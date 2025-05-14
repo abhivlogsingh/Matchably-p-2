@@ -12,7 +12,7 @@ import "swiper/css/pagination";
 import SubmitApplication from "../components/application/submitApplication";
 import SuccessPopup from "../components/successPopup";
 import { Helmet } from "react-helmet";
-import Cookies from "js-cookie"; 
+import Cookies from "js-cookie";
 
 const CampaignDetail = () => {
   const [loading, setloading] = useState(true);
@@ -29,6 +29,9 @@ const CampaignDetail = () => {
   const [tiktokUrls, setTiktokUrls] = useState("");
   const [allowReuse, setAllowReuse] = useState(false);
   const [appliedStatus, setAppliedStatus] = useState(""); // "Approved", "Rejected", "Pending", ""
+  const [applicantsCount, setApplicantsCount] = useState(0);
+const [appliedThisMonth, setAppliedThisMonth] = useState(0);
+const [campaignStatus, setCampaignStatus] = useState("Recruiting"); // or "Closed"
 
 
   useEffect(() => {
@@ -36,7 +39,7 @@ const CampaignDetail = () => {
       fetchSubmittedData();
     }
   }, [appliedStatus]);
-  
+
   async function fetchSubmittedData() {
     try {
       const token = Cookies.get("token") || localStorage.getItem("token");
@@ -48,7 +51,7 @@ const CampaignDetail = () => {
           },
         }
       );
-  
+
       if (res.data.status === "success") {
         setSubmittedUrls({
           instagram: res.data.data.instagram_urls,
@@ -57,97 +60,99 @@ const CampaignDetail = () => {
         });
       }
     } catch (err) {
-      console.error("Error fetching submitted content:", err.response?.data || err.message);
+      console.error(
+        "Error fetching submitted content:",
+        err.response?.data || err.message
+      );
     }
-  } 
-  
+  }
+
   const handleSubmitContent = async () => {
     const token = Cookies.get("token") || localStorage.getItem("token");
     try {
-      const res = await axios.post(`${config.BACKEND_URL}/user/campaign-submission`, {
-        campaign_id: campaignId,
-        email: User.email,
-        instagram_urls: instagramUrls.split(",").map(url => url.trim()),
-        youtube_urls: youtubeUrls.split(",").map(url => url.trim()),
-        tiktok_urls: tiktokUrls.split(",").map(url => url.trim()),
-        allow_brand_reuse: allowReuse,
-      }, {
-        headers: {
-          Authorization: token,
+      const res = await axios.post(
+        `${config.BACKEND_URL}/user/campaign-submission`,
+        {
+          campaign_id: campaignId,
+          email: User.email,
+          instagram_urls: instagramUrls.split(",").map((url) => url.trim()),
+          youtube_urls: youtubeUrls.split(",").map((url) => url.trim()),
+          tiktok_urls: tiktokUrls.split(",").map((url) => url.trim()),
+          allow_brand_reuse: allowReuse,
         },
-      });
-  
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
       alert("Content submitted successfully!");
-  
+
       // Show URLs after submit
       setSubmittedUrls({
-        instagram: instagramUrls.split(",").map(url => url.trim()),
-        youtube: youtubeUrls.split(",").map(url => url.trim()),
-        tiktok: tiktokUrls.split(",").map(url => url.trim()),
+        instagram: instagramUrls.split(",").map((url) => url.trim()),
+        youtube: youtubeUrls.split(",").map((url) => url.trim()),
+        tiktok: tiktokUrls.split(",").map((url) => url.trim()),
       });
-  
+
       setShowSubmitModal(false); // close modal
     } catch (error) {
       console.error("Submission failed:", error);
       alert("Something went wrong while submitting.");
     }
   };
-  
 
   useEffect(() => {
     if (User?.email && campaignId) {
       getUserApplicationStatus();
     }
   }, [User, campaignId]);
-  
+
   async function getUserApplicationStatus() {
-    try {
-      const token = Cookies.get("token") || localStorage.getItem("token");
-      const res = await axios.get(`${config.BACKEND_URL}/user/campaigns/appliedCampaigns`, {
-        headers: {
-          authorization: token,
-        },
-      });
-  
-      console.log("API response from /appliedCampaigns:", res.data);
-  
-      if (res.data.status === "success") {
-        const found = res.data.campaigns.find(c => String(c.id) === String(campaignId));
-        console.log("Matched campaign:", found);
-  
-        if (found) {
-          setAppliedStatus(found.applicationStatus);
-          console.log("Applied status set to:", found.applicationStatus);
-        } else {
-          console.log("Campaign not found in user's applied campaigns.");
-        }
-      } else {
-        console.log("API call succeeded but response.status !== 'success'");
+  try {
+    const token = Cookies.get("token") || localStorage.getItem("token");
+    const res = await axios.get(`${config.BACKEND_URL}/user/campaigns/appliedCampaigns`, {
+      headers: {
+        authorization: token,
+      },
+    });
+
+    if (res.data.status === "success") {
+      setAppliedThisMonth(res.data.appliedThisMonth || 0);
+      const found = res.data.campaigns.find(c => String(c.id) === String(campaignId));
+      if (found) {
+        setAppliedStatus(found.applicationStatus);
       }
-    } catch (err) {
-      console.error("Error fetching applied status:", err);
     }
+  } catch (err) {
+    console.error("Error fetching applied status:", err);
   }
+}
+
 
   useEffect(() => {
     getCampaign();
   }, [campaignId]);
 
-  async function getCampaign() {
-    try {
-      console.log(User.email);
-      const res = await axios.get(
-        `${config.BACKEND_URL}/user/campaigns/${campaignId}/${User.email}`
-      );
-      if (res.data.status === "success") {
-        setCampaign(res.data.campaign);
-      }
-    } catch {
-      // something
-    } finally {
-      setloading(false);
+ async function getCampaign() {
+  try {
+    const res = await axios.get(
+      `${config.BACKEND_URL}/user/campaigns/${campaignId}/${User.email}`
+    );
+    if (res.data.status === "success") {
+      const c = res.data.campaign;
+      setCampaign(c);
+      setApplicantsCount(res.data.applicantsCount || 0);
+      setCampaignStatus(res.data.campaignStatus || "Recruiting");
     }
+  } catch {
+    // error handling
+  } finally {
+    setloading(false);
   }
+}
+
 
   const handleOutsideClick = (e) => {
     if (e.target.id === "sidebar-overlay") {
@@ -160,11 +165,21 @@ const CampaignDetail = () => {
   if (campaign && !loading) {
     metaTags = [
       <meta name="robots" content="index, follow" key="robots" />,
-      <meta property="og:title" content={campaign.campaignTitle || "N/A"} key="og-title" />,
-      <meta property="og:description" content={campaign.productDescription || "N/A"} key="og-description" />
+      <meta
+        property="og:title"
+        content={campaign.campaignTitle || "N/A"}
+        key="og-title"
+      />,
+      <meta
+        property="og:description"
+        content={campaign.productDescription || "N/A"}
+        key="og-description"
+      />,
     ];
   } else {
-    metaTags = [<meta name="robots" content="noindex, nofollow" key="robots" />];
+    metaTags = [
+      <meta name="robots" content="noindex, nofollow" key="robots" />,
+    ];
   }
 
   return (
@@ -183,57 +198,62 @@ const CampaignDetail = () => {
               <div className="relative aspect-square">
                 {campaign.productImages?.length > 0 ? (
                   <Swiper
-                  modules={[Navigation, Pagination]}
-                  navigation={{
-                    nextEl: ".swiper-button-next",
-                    prevEl: ".swiper-button-prev",
-                  }}
-                  pagination={{
-                    clickable: true,
-                    el: ".swiper-pagination",
-                    type: "bullets",
-                    bulletClass: "swiper-pagination-bullet",
-                    bulletActiveClass: "swiper-pagination-bullet-active",
-                  }}
-                  spaceBetween={0}
-                  slidesPerView={1}
-                  className="h-full w-full"
-                >
-                  {campaign.productImages.map((image, index) => (
-                    <SwiperSlide key={index}>
-                      <img
-                        src={image}
-                        alt={"N/A"}
-                        className="w-full h-full object-contain rounded-2xl"
-                        draggable="false"
-                      />
-                    </SwiperSlide>
-                  ))}
-                  
-                  {/* Bottom controls container */}
-                  <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-transparent">
-                    {/* Left arrow - made smaller */}
-                    <div className="swiper-button-prev 
+                    modules={[Navigation, Pagination]}
+                    navigation={{
+                      nextEl: ".swiper-button-next",
+                      prevEl: ".swiper-button-prev",
+                    }}
+                    pagination={{
+                      clickable: true,
+                      el: ".swiper-pagination",
+                      type: "bullets",
+                      bulletClass: "swiper-pagination-bullet",
+                      bulletActiveClass: "swiper-pagination-bullet-active",
+                    }}
+                    spaceBetween={0}
+                    slidesPerView={1}
+                    className="h-full w-full"
+                  >
+                    {campaign.productImages.map((image, index) => (
+                      <SwiperSlide key={index}>
+                        <img
+                          src={image}
+                          alt={"N/A"}
+                          className="w-full h-full object-contain rounded-2xl"
+                          draggable="false"
+                        />
+                      </SwiperSlide>
+                    ))}
+
+                    {/* Bottom controls container */}
+                    <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 py-2 bg-transparent">
+                      {/* Left arrow - made smaller */}
+                      <div
+                        className="swiper-button-prev 
                       !static !relative !top-auto !left-auto !right-auto 
                       !mt-0 !w-6 !h-6 !bg-black/50 
                       !rounded-full !flex !items-center !justify-center 
-                      [&::after]:!text-xs [&::after]:!text-white [&::after]:!font-bold" />
-                  
-                    {/* Pagination dots */}
-                    <div className="swiper-pagination 
+                      [&::after]:!text-xs [&::after]:!text-white [&::after]:!font-bold"
+                      />
+
+                      {/* Pagination dots */}
+                      <div
+                        className="swiper-pagination 
                       !relative !bottom-auto !left-auto !w-auto
                       [&>.swiper-pagination-bullet]:!bg-black/30 [&>.swiper-pagination-bullet]:!w-2 [&>.swiper-pagination-bullet]:!h-2
-                      [&>.swiper-pagination-bullet-active]:!bg-black" />
-                  
-                    {/* Right arrow - made smaller */}
-                    <div className="swiper-button-next 
+                      [&>.swiper-pagination-bullet-active]:!bg-black"
+                      />
+
+                      {/* Right arrow - made smaller */}
+                      <div
+                        className="swiper-button-next 
                       !static !relative !top-auto !left-auto !right-auto 
                       !mt-0 !w-6 !h-6 !bg-black/50 
                       !rounded-full !flex !items-center !justify-center 
-                      [&::after]:!text-xs [&::after]:!text-white [&::after]:!font-bold" />
-                  </div>
-                </Swiper>
-                
+                      [&::after]:!text-xs [&::after]:!text-white [&::after]:!font-bold"
+                      />
+                    </div>
+                  </Swiper>
                 ) : (
                   <div className="h-full w-full flex items-center justify-center bg-gray-100/20 rounded-lg">
                     <img
@@ -274,12 +294,19 @@ const CampaignDetail = () => {
                 <strong>Deadline:</strong>{" "}
                 {campaign.deadline ? campaign.deadline.split("T")[0] : "N/A"}
               </p>
-              {campaign.recruiting > 0 && (
+              {/* {campaign.recruiting > 0 && (
+                <p className="text-[#d2d2d2] mt-[8px]">
+                  <strong>Recruiting:</strong> {campaign.recruiting}
+                </p>
+              )} */}
               <p className="text-[#d2d2d2] mt-[8px]">
-                <strong>Recruiting:</strong>{" "}
-                {campaign.recruiting}
-              </p>
-              )}
+  <strong>Applicants:</strong> {applicantsCount} / {campaign.recruiting || "N/A"}
+</p>
+<p className={`mt-2 font-semibold text-sm inline-block px-3 py-1 rounded-full 
+  ${campaignStatus === "Closed" ? "bg-red-600 text-white" : "bg-green-600 text-white"}`}>
+  {campaignStatus}
+</p>
+
               <div className="flex flex-wrap gap-[20px]">
                 {campaign.contentFormat?.map((content, index) => {
                   return (
@@ -294,15 +321,14 @@ const CampaignDetail = () => {
               </div>
               {appliedStatus === "Approved" && (
                 <Link to={`/AddPostUrl/${campaignId}`}>
-  <button
-    // onClick={() => setShowSubmitModal(true)}
-    className="bg-yellow-400 text-black font-semibold px-6 py-2 rounded-full hover:bg-yellow-500 mt-4"
-  >
-   + Add Post
-  </button>
-  </Link>
-)}
-
+                  <button
+                    // onClick={() => setShowSubmitModal(true)}
+                    className="bg-yellow-400 text-black font-semibold px-6 py-2 rounded-full hover:bg-yellow-500 mt-4"
+                  >
+                    + Add Post
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
 
@@ -326,16 +352,21 @@ const CampaignDetail = () => {
             </div>
 
             <div className="flex justify-end">
-            <button
-  onClick={() => {
-    if (!isLogin) {
-      Navigate("/signin");
-      return;
-    }
-    setIsOpen(true);
-  }}
-  disabled={!!appliedStatus}
-  className={`w-full md:w-auto flex justify-center items-center font-semibold py-3 px-8 rounded-full transition-all duration-300 transform
+              <button
+                onClick={() => {
+                  if (!isLogin) {
+                    Navigate("/signin");
+                    return;
+                  }
+                  setIsOpen(true);
+                }}
+               disabled={
+  !!appliedStatus ||
+  campaignStatus === "Closed" ||
+  appliedThisMonth >= 5
+}
+
+                className={`w-full md:w-auto flex justify-center items-center font-semibold py-3 px-8 rounded-full transition-all duration-300 transform
     ${
       appliedStatus === "Approved"
         ? "bg-green-600 text-white cursor-default"
@@ -345,75 +376,88 @@ const CampaignDetail = () => {
         ? "bg-yellow-400 text-black cursor-default"
         : "text-black bg-[#facc15] hover:bg-[#ffb703] hover:scale-105 hover:shadow-lg"
     } shadow-md`}
->
-  {appliedStatus === "Approved"
-    ? "Approved"
-    : appliedStatus === "Rejected"
-    ? "Rejected"
-    : appliedStatus === "Pending"
-    ? "Pending"
-    : "Apply to this Campaign"}
-</button>
+              >
+                {appliedStatus === "Approved"
+  ? "Approved"
+  : appliedStatus === "Rejected"
+  ? "Rejected"
+  : appliedStatus === "Pending"
+  ? "Pending"
+  : campaignStatus === "Closed"
+  ? "Campaign Closed"
+  : appliedThisMonth >= 5
+  ? "Limit Reached"
+  : "Apply to this Campaign"}
 
+              </button>
             </div>
           </div>
         </div>
       )}
 
-{showSubmitModal && (
-  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]">
-    <div className="bg-[#1e1e1e] p-6 rounded-lg max-w-[500px] w-full shadow-xl">
-      <h3 className="text-white text-xl font-semibold mb-4">Submit Your Content</h3>
+      {showSubmitModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]">
+          <div className="bg-[#1e1e1e] p-6 rounded-lg max-w-[500px] w-full shadow-xl">
+            <h3 className="text-white text-xl font-semibold mb-4">
+              Submit Your Content
+            </h3>
 
-      <label className="text-white block mb-1">Instagram URLs (comma-separated)</label>
-      <input
-        type="text"
-        className="w-full p-2 mb-3 rounded bg-black/40 text-white border border-gray-500"
-        value={instagramUrls}
-        onChange={(e) => setInstagramUrls(e.target.value)}
-      />
+            <label className="text-white block mb-1">
+              Instagram URLs (comma-separated)
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 mb-3 rounded bg-black/40 text-white border border-gray-500"
+              value={instagramUrls}
+              onChange={(e) => setInstagramUrls(e.target.value)}
+            />
 
-      <label className="text-white block mb-1">YouTube URLs (comma-separated)</label>
-      <input
-        type="text"
-        className="w-full p-2 mb-3 rounded bg-black/40 text-white border border-gray-500"
-        value={youtubeUrls}
-        onChange={(e) => setYoutubeUrls(e.target.value)}
-      />
+            <label className="text-white block mb-1">
+              YouTube URLs (comma-separated)
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 mb-3 rounded bg-black/40 text-white border border-gray-500"
+              value={youtubeUrls}
+              onChange={(e) => setYoutubeUrls(e.target.value)}
+            />
 
-      <label className="text-white block mb-1">TikTok URLs (comma-separated)</label>
-      <input
-        type="text"
-        className="w-full p-2 mb-3 rounded bg-black/40 text-white border border-gray-500"
-        value={tiktokUrls}
-        onChange={(e) => setTiktokUrls(e.target.value)}
-      />
+            <label className="text-white block mb-1">
+              TikTok URLs (comma-separated)
+            </label>
+            <input
+              type="text"
+              className="w-full p-2 mb-3 rounded bg-black/40 text-white border border-gray-500"
+              value={tiktokUrls}
+              onChange={(e) => setTiktokUrls(e.target.value)}
+            />
 
-      <label className="text-white flex items-center gap-2 mb-4">
-        <input type="checkbox" checked={allowReuse} onChange={(e) => setAllowReuse(e.target.checked)} />
-        I authorize the brand to reuse my submitted content.
-      </label>
+            <label className="text-white flex items-center gap-2 mb-4">
+              <input
+                type="checkbox"
+                checked={allowReuse}
+                onChange={(e) => setAllowReuse(e.target.checked)}
+              />
+              I authorize the brand to reuse my submitted content.
+            </label>
 
-      <div className="flex justify-end gap-2">
-        <button
-          onClick={() => setShowSubmitModal(false)}
-          className="text-white px-4 py-2 rounded bg-gray-600 hover:bg-gray-700"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={handleSubmitContent}
-          className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 font-semibold"
-        >
-          Submit
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowSubmitModal(false)}
+                className="text-white px-4 py-2 rounded bg-gray-600 hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitContent}
+                className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 font-semibold"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isOpen && (
         <div
           id="sidebar-overlay"
@@ -428,9 +472,9 @@ const CampaignDetail = () => {
         setSuccess={setSuccess}
       ></SubmitApplication>
       <SuccessPopup
-        show={success}      
+        show={success}
         onClose={() => {
-          setAppliedStatus("Pending"); 
+          setAppliedStatus("Pending");
           setCampaign((prev) => ({ ...prev, applied: true }));
           setSuccess(false);
         }}

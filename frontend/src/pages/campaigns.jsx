@@ -7,6 +7,8 @@ import useAuthStore from "../state/atoms";
 import Cookies from "js-cookie"; 
 
 const CampaignList = () => {
+  const [showLimitPopupIndex, setShowLimitPopupIndex] = useState(null);
+  const [appliedThisMonth, setAppliedThisMonth] = useState(0);
   const [page, setPage] = useState(1);
   const [campaigns, setCampaigns] = useState([]);
   const [loadMore, setLoadMore] = useState(true);
@@ -32,22 +34,24 @@ const CampaignList = () => {
   }, [isLogin]);
 
   async function fetchAppliedCampaigns() {
-    try {
-      const token = Cookies.get("token") || localStorage.getItem("token");
-      const res = await axios.get(`${config.BACKEND_URL}/user/campaigns/appliedCampaigns`, {
-        headers: {
-          authorization: token,
-        },
-      });
-  
-      if (res.data.status === "success") {
-        const ids = res.data.campaigns.map((c) => String(c.id));
-        setAppliedCampaignIds(ids);
-      }
-    } catch (err) {
-      console.error("Error fetching applied campaigns:", err);
+  try {
+    const token = Cookies.get("token") || localStorage.getItem("token");
+    const res = await axios.get(`${config.BACKEND_URL}/user/campaigns/appliedCampaigns`, {
+      headers: {
+        authorization: token,
+      },
+    });
+
+    if (res.data.status === "success") {
+      const ids = res.data.campaigns.map((c) => String(c.id));
+      setAppliedCampaignIds(ids);
+      setAppliedThisMonth(res.data.appliedThisMonth || ids.length); // fallback
     }
+  } catch (err) {
+    console.error("Error fetching applied campaigns:", err);
   }
+}
+
 
   async function getCampaigns() {
     try {
@@ -127,63 +131,91 @@ const CampaignList = () => {
         <div className="flex justify-center md:justify-around gap-8 flex-wrap w-[90%]">
           {displayedCampaigns.map((data, index) => (
             <div
-              key={index}
-              className="bg-[#262626eb] p-5 w-[320px] rounded-2xl px-[20px] shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl"
-            >
-              {/* Logo at top */}
-              <div className="w-full flex justify-center mb-4">
-                <img
-                  src={
-                    data.image ||
-                    "https://media.istockphoto.com/id/2086856987/photo/golden-shiny-vintage-picture-frame-isolated-on-white.webp?s=1024x1024&w=is&k=20&c=ZzNs8GaqtXVQt4ff1xJ77OsEmVFVRaAKC3ecLUpWvqI="
-                  }
-                  alt="Campaign Logo"
-                  className="w-[120px] h-[120px] rounded-full object-cover bg-white"
-                />
-              </div>
+  key={index}
+  className="bg-[#262626eb] p-5 w-[320px] rounded-2xl px-[20px] shadow-lg transition-transform transform hover:scale-105 hover:shadow-2xl"
+>
+  {/* Logo at top */}
+  <div className="w-full flex justify-center mb-4">
+    <img
+      src={
+        data.image ||
+        "https://media.istockphoto.com/id/2086856987/photo/golden-shiny-vintage-picture-frame-isolated-on-white.webp"
+      }
+      alt="Campaign Logo"
+      className="w-[120px] h-[120px] rounded-full object-cover bg-white"
+    />
+  </div>
 
-              {/* Brand Name */}
-              <h3 className="text-[#d2d2d2] font-bold text-[14px] mb-2">
-              Brand Name: {data.brand?.replace(/^#/, '') || "Unknown Brand"}
+  {/* Brand and Product */}
+  <h3 className="text-[#d2d2d2] font-bold text-[14px] mb-1">
+    Brand: {data.brand?.replace(/^#/, '') || "Unknown"}
+  </h3>
+  <h3 className="text-[#d2d2d2] font-bold text-[14px] mb-1">
+    Product: {data.name || "Unnamed"}
+  </h3>
 
-              </h3>
+  {/* Platforms */}
+  <p className="text-[#d2d2d2] text-sm mb-1">
+    Platforms: {data.category?.join(", ") || "N/A"}
+  </p>
 
-              {/* Product Name */}
-              <h3 className="text-[#d2d2d2] font-bold text-[14px] mb-2">
-                Product Name: {data.name || "Unnamed Product"}
-              </h3>
+  {/* Deadline */}
+  <p className="text-[#d2d2d2] text-sm mb-1">
+    Apply by: {data.deadline ? data.deadline.split("T")[0] : "N/A"}
+  </p>
 
-              {/* SNS Platforms */}
-              <p className="text-[#d2d2d2] font-bold text-[14px] mb-2">
-                SNS platforms:{" "}
-                {data.category && data.category.length > 0
-                  ? data.category.join(", ")
-                  : "N/A"}
-              </p>
+  {/* Applicants */}
+  {data.recruiting > 0 && (
+    <p className="text-[#d2d2d2] text-sm mb-1">
+      Applicants: {data.applicantsCount || 0} / {data.recruiting}
+    </p>
+  )}
 
-              {/* Apply by */}
-              <p className="text-[#d2d2d2] font-bold text-[14px] mb-2">
-                Apply by: {data.deadline ? data.deadline.split("T")[0] : "N/A"}
-              </p>
+  {/* Badge */}
+  <span
+    className={`text-xs font-bold inline-block px-3 py-1 rounded-full mb-3 ${
+      data.campaignStatus === "Closed"
+        ? "bg-red-600 text-white"
+        : "bg-green-600 text-white"
+    }`}
+  >
+    {data.campaignStatus || "Recruiting"}
+  </span>
 
-              {/* Recruiting */}
-              {data.recruiting > 0 && (
-                <p className="text-[#d2d2d2] font-bold text-[14px] mb-2">
-                  Recruiting: {data.recruiting}
-                </p>
-              )}
-
-{isLogin ? (
+  {/* Button */}
+  {isLogin ? (
   appliedCampaignIds.includes(String(data.id)) ? (
     <button
-      className="mt-3 w-full border border-gray-500 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed bg-[#444]"
+      className="w-full border border-gray-500 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed bg-[#444]"
       disabled
     >
       Applied
     </button>
+  ) : data.campaignStatus === "Closed" ? (
+    <button
+      className="w-full border border-gray-500 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed bg-[#444]"
+      disabled
+    >
+      Closed
+    </button>
+  ) : appliedThisMonth >= 5 ? (
+  <div className="relative w-full">
+    <button
+      className="w-full border border-gray-500 text-gray-400 py-2 px-4 rounded-lg cursor-not-allowed bg-[#444]"
+      onMouseEnter={() => setShowLimitPopupIndex(index)}
+      onMouseLeave={() => setShowLimitPopupIndex(null)}
+    >
+      Limit Reached
+    </button>
+    {showLimitPopupIndex === index && (
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-black text-white text-sm rounded px-3 py-2 shadow-xl z-50 w-[240px] text-center">
+        You’ve reached your monthly apply limit (5 campaigns).
+      </div>
+    )}
+  </div>
   ) : (
     <button
-      className="mt-3 w-full border-[1px] cursor-pointer text-white py-2 px-4 rounded-lg hover:bg-white hover:text-black transition-all FontNoto"
+      className="w-full border-[1px] cursor-pointer text-white py-2 px-4 rounded-lg hover:bg-white hover:text-black transition-all FontNoto"
       onClick={() => navigate(`/campaign/${data.id}`)}
     >
       Apply Now
@@ -191,16 +223,15 @@ const CampaignList = () => {
   )
 ) : (
   <button
-  className="mt-3 w-full border border-white text-white py-2 px-4 rounded-lg hover:bg-white hover:text-black transition-all font-semibold shadow-sm hover:shadow-md FontNoto"
-  onClick={() => navigate("/signin")}
->
-  Sign In to Apply
-</button>
-
+    className="w-full border border-white text-white py-2 px-4 rounded-lg hover:bg-white hover:text-black transition-all font-semibold shadow-sm hover:shadow-md FontNoto"
+    onClick={() => navigate("/signin")}
+  >
+    Sign In to Apply
+  </button>
 )}
 
+</div>
 
-            </div>
           ))}
           {loading &&
             [...Array(6)].map((_, i) => <CampaignCardSkeleton key={i} />)}
