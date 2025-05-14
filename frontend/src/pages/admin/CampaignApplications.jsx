@@ -3,15 +3,14 @@
 // ✅ Refactored ViewCampaignApplicants with status update & proper hooks
 
 import React, { useEffect, useState } from 'react';
-import { Download, Save} from 'lucide-react';
+import { Download, Save } from 'lucide-react';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import config from '../../config';
 import { Link, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { AiOutlineEye } from "react-icons/ai"
-import { FaTrashAlt }   from "react-icons/fa"
-
+import { AiOutlineEye } from 'react-icons/ai';
+import { FaTrashAlt } from 'react-icons/fa';
 
 const Button = ({ children, onClick }) => (
 	<button
@@ -28,116 +27,116 @@ const ApplicantRow = ({
 	edited,
 	onFieldChange,
 	onSave,
-	onDelete
-  }) => {
+	onDelete,
+}) => {
 	const { status, rejectionReason, showReasonToInfluencer } = edited;
-  
+
 	return (
-	  <tr className="border-b border-gray-800 hover:bg-[#303030] transition-colors">
-		{/* 1. Applicant Info */}
-		<td className="p-3">{applicant.name}</td>
-		<td className="p-3">{applicant.email}</td>
-		<td className="p-3">{applicant.address}</td>
-		<td className="p-3">{applicant.phone}</td>
-		<td className="p-3">{applicant.appliedAt.split('T')[0]}</td>
-  
-		{/* 2. View Submission Link */}
-		<td className="p-3">
-		  <Link
-			to={`/admin/campaign-submission/${campaignId}/${encodeURIComponent(
-			  applicant.email
-			)}`}
-			className="
+		<tr className='border-b border-gray-800 hover:bg-[#303030] transition-colors'>
+			{/* 1. Applicant Info */}
+			<td className='p-3'>{applicant.name}</td>
+			<td className='p-3'>{applicant.email}</td>
+			<td className='p-3'>{applicant.address}</td>
+			<td className='p-3'>{applicant.phone}</td>
+			<td className='p-3'>{applicant.appliedAt.split('T')[0]}</td>
+
+			{/* 2. View Submission Link */}
+			<td className='p-3'>
+				<Link
+					to={`/admin/campaign-submission/${campaignId}/${encodeURIComponent(
+						applicant.email
+					)}`}
+					className='
 			  inline-flex items-center px-4 py-2
 			  bg-indigo-600 text-white text-sm font-medium
 			  rounded-md shadow-sm
 			  hover:bg-indigo-700
 			  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
 			  transition
-			"
-		  >
-			<AiOutlineEye className="h-5 w-5 mr-2" />
-			View Submission
-		  </Link>
-		</td>
-  
-		{/* 3. Status Dropdown, Rejection Fields & Actions */}
-		<td className="p-3">
-		  <select
-			value={status}
-			onChange={e =>
-			  onFieldChange(applicant.id, 'status', e.target.value)
-			}
-			className={`
+			'
+				>
+					<AiOutlineEye className='h-5 w-5 mr-2' />
+					View Submission
+				</Link>
+			</td>
+
+			{/* 3. Status Dropdown, Rejection Fields & Actions */}
+			<td className='p-3'>
+				<select
+					value={status}
+					onChange={(e) =>
+						onFieldChange(applicant.id, 'status', e.target.value)
+					}
+					className={`
 			  bg-[#2c2c2c] border px-2 py-1 rounded text-white outline-none mb-2 w-full
 			  ${
-				status === 'Approved'
-				  ? 'border-green-500'
-				  : status === 'Rejected'
-				  ? 'border-red-500'
-				  : 'border-yellow-500'
-			  }
-			`}
-		  >
-			<option value="Pending">Pending</option>
-			<option value="Approved">Approved</option>
-			<option value="Rejected">Rejected</option>
-		  </select>
-  
-		  {status === 'Rejected' && (
-			<>
-			  <textarea
-				placeholder="Rejection reason"
-				value={rejectionReason}
-				onChange={e =>
-				  onFieldChange(applicant.id, 'rejectionReason', e.target.value)
+					status === 'Approved'
+						? 'border-green-500'
+						: status === 'Rejected'
+						? 'border-red-500'
+						: 'border-yellow-500'
 				}
-				className="
+			`}
+				>
+					<option value='Pending'>Pending</option>
+					<option value='Approved'>Approved</option>
+					<option value='Rejected'>Rejected</option>
+				</select>
+
+				{status === 'Rejected' && (
+					<>
+						<textarea
+							placeholder='Rejection reason'
+							value={rejectionReason}
+							onChange={(e) =>
+								onFieldChange(applicant.id, 'rejectionReason', e.target.value)
+							}
+							className='
 				  w-full p-2 bg-[#1e1e1e] border border-gray-600
 				  rounded text-white text-sm mb-2
-				"
-			  />
-			  <label className="flex items-center gap-2 text-sm text-white mb-2">
-				<input
-				  type="checkbox"
-				  checked={showReasonToInfluencer}
-				  onChange={() =>
-					onFieldChange(
-					  applicant.id,
-					  'showReasonToInfluencer',
-					  !showReasonToInfluencer
-					)
-				  }
-				/>
-				Show reason to influencer
-			  </label>
-			</>
-		  )}
-  
-		  <div className="flex gap-2">
-			<button
-			  onClick={() => onSave(applicant.id)}
-			  className="
+				'
+						/>
+						<label className='flex items-center gap-2 text-sm text-white mb-2'>
+							<input
+								type='checkbox'
+								checked={showReasonToInfluencer}
+								onChange={() =>
+									onFieldChange(
+										applicant.id,
+										'showReasonToInfluencer',
+										!showReasonToInfluencer
+									)
+								}
+							/>
+							Show reason to influencer
+						</label>
+					</>
+				)}
+
+				<div className='flex gap-2'>
+					<button
+						onClick={() => onSave(applicant.id)}
+						className='
 				bg-blue-600 hover:bg-blue-700 text-white text-sm
 				px-3 py-1 rounded
-			  "
-			>
-			  Save
-			</button>
-			<button
-			  onClick={() => onDelete(applicant.id)}
-			  className="
+			  '
+					>
+						Save
+					</button>
+					<button
+						onClick={() => onDelete(applicant.id)}
+						className='
 				bg-red-600 hover:bg-red-700 text-white
 				px-3 py-1 rounded
-			  "
-			>
-			  <FaTrashAlt />
-			</button>
-		  </div>
-		</td>
-	  </tr>
+			  '
+					>
+						<FaTrashAlt />
+					</button>
+				</div>
+			</td>
+		</tr>
 	);
-  };
+};
 
 const ViewCampaignApplicants = () => {
 	const { campaignId } = useParams();
@@ -169,97 +168,96 @@ const ViewCampaignApplicants = () => {
 	};
 
 	// inside ViewCampaignApplicants
-const handleSaveOne = async (applicantId) => {
-	const token = Cookies.get('AdminToken');
-	const data = editedApplications[applicantId];
-	try {
-	  await axios.patch(
-		`${config.BACKEND_URL}/admin/applications/${applicantId}/status`,
-		{
-		  status: data.status,
-		  rejectionReason: data.rejectionReason,
-		  showReasonToInfluencer: data.showReasonToInfluencer
-		},
-		{ headers: { authorization: token } }
-	  );
-	  alert('Applicant updated');
-	  getApplications();
-	} catch {
-	  alert('Failed to save applicant');
-	}
-  };
-  
+	const handleSaveOne = async (applicantId) => {
+		const token = Cookies.get('AdminToken');
+		const data = editedApplications[applicantId];
+		try {
+			await axios.patch(
+				`${config.BACKEND_URL}/admin/applications/${applicantId}/status`,
+				{
+					status: data.status,
+					rejectionReason: data.rejectionReason,
+					showReasonToInfluencer: data.showReasonToInfluencer,
+				},
+				{ headers: { authorization: token } }
+			);
+			alert('Applicant updated');
+			getApplications();
+		} catch {
+			alert('Failed to save applicant');
+		}
+	};
 
 	const getApplications = async () => {
 		setloading(true);
-	  
+
 		try {
-		  const token = Cookies.get('AdminToken');
-		  const res = await axios.get(
-			`${config.BACKEND_URL}/admin/applications/${campaignId}`,
-			{ headers: { authorization: token } }
-		  );
-		  if (res.data.status === 'success') {
-			const apps = res.data.applications;
-	  
-			// 1. Set the raw list
-			setApplications(apps);
-	  
-			// 2. Build the “edited” map for Save All
-			const initialEdits = {};
-			apps.forEach(app => {
-			  initialEdits[app.id] = {
-				status: app.status,
-				rejectionReason: app.rejectionReason || '',
-				showReasonToInfluencer: app.showReasonToInfluencer || false
-			  };
-			});
-			setEditedApplications(initialEdits);
-	  
-			// 3. Other existing setters
-			setLast(!res.data.isLastPage);
-			setLastId(res.data.nextCursor);
-			setCampaignTitle(res.data.campaignTitle);
-		  }
+			const token = Cookies.get('AdminToken');
+			const res = await axios.get(
+				`${config.BACKEND_URL}/admin/applications/${campaignId}`,
+				{ headers: { authorization: token } }
+			);
+			if (res.data.status === 'success') {
+				const apps = res.data.applications;
+
+				// 1. Set the raw list
+				setApplications(apps);
+
+				// 2. Build the “edited” map for Save All
+				const initialEdits = {};
+				apps.forEach((app) => {
+					initialEdits[app.id] = {
+						status: app.status,
+						rejectionReason: app.rejectionReason || '',
+						showReasonToInfluencer: app.showReasonToInfluencer || false,
+					};
+				});
+				setEditedApplications(initialEdits);
+
+				// 3. Other existing setters
+				setLast(!res.data.isLastPage);
+				setLastId(res.data.nextCursor);
+				setCampaignTitle(res.data.campaignTitle);
+			}
 		} finally {
-		  setloading(false);
+			setloading(false);
 		}
-	  };
+	};
 
-	    // 2. Row field update handler
-  const handleFieldChange = (applicantId, field, value) => {
-    setEditedApplications(prev => ({
-      ...prev,
-      [applicantId]: {
-        ...prev[applicantId],
-        [field]: value
-      }
-    }));
-  };
+	// 2. Row field update handler
+	const handleFieldChange = (applicantId, field, value) => {
+		setEditedApplications((prev) => ({
+			...prev,
+			[applicantId]: {
+				...prev[applicantId],
+				[field]: value,
+			},
+		}));
+	};
 
-    // 3. Save all in one shot
+	// 3. Save all in one shot
 	const saveAll = async () => {
 		const token = Cookies.get('AdminToken');
 		try {
-		  await Promise.all(
-			Object.entries(editedApplications).map(([id, data]) =>
-			  axios.patch(
-				`${config.BACKEND_URL}/admin/applications/${id}/status`,
-				{
-				  status: data.status,
-				  rejectionReason: data.rejectionReason,
-				  showReasonToInfluencer: data.showReasonToInfluencer
-				},
-				{ headers: { authorization: token } }
-			  )
-			)
-		  );
-		  alert('All applicants updated successfully');
-		  getApplications();
+			await Promise.all(
+				Object.entries(editedApplications).map(([id, data]) =>
+					axios.patch(
+						`${config.BACKEND_URL}/admin/applications/${id}/status`,
+						{
+							status: data.status,
+							rejectionReason: data.rejectionReason,
+							showReasonToInfluencer: data.showReasonToInfluencer,
+						},
+						{ headers: { authorization: token } }
+					)
+				)
+			);
+			alert('All applicants updated successfully');
+			getApplications();
 		} catch (e) {
-		  alert('Failed to save some changes');
+			alert('Failed to save some changes');
 		}
-	  };
+	};
 
 	const paginate = async () => {
 		setloading(true);
@@ -314,20 +312,20 @@ const handleSaveOne = async (applicantId) => {
 					content='noindex, nofollow'
 				/>
 			</Helmet>
-			<div className="flex justify-between items-center mb-4">
-  <h2 className="text-xl font-semibold FontLato">Applicants</h2>
-  <div className="flex space-x-2">
-    {/* New Save All button */}
-    <Button  onClick={saveAll}>
-      <Save size={16} /> <span>Save All</span>
-    </Button>
+			<div className='flex justify-between items-center mb-4'>
+				<h2 className='text-xl font-semibold FontLato'>Applicants</h2>
+				<div className='flex space-x-2'>
+					{/* New Save All button */}
+					<Button onClick={saveAll}>
+						<Save size={16} /> <span>Save All</span>
+					</Button>
 
-    {/* Existing Export CSV button */}
-    <Button onClick={exportToCSV}>
-      <Download size={16} /> <span>Export CSV</span>
-    </Button>
-  </div>
-</div>
+					{/* Existing Export CSV button */}
+					<Button onClick={exportToCSV}>
+						<Download size={16} /> <span>Export CSV</span>
+					</Button>
+				</div>
+			</div>
 
 			<div className='text-white h-[50px] text-[green]'>
 				<Link to={`/campaign/${campaignId}`}>{campaignTitle}</Link>
