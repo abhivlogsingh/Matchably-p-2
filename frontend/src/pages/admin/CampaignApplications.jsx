@@ -148,6 +148,8 @@ const ViewCampaignApplicants = () => {
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [selectedApplicantId, setSelectedApplicantId] = useState(null);
 	const [editedApplications, setEditedApplications] = useState({});
+    const [recruitingLimit, setRecruitingLimit] = useState(0);
+    const [approvedCount, setApprovedCount] = useState(0);
 
 	const exportToCSV = async () => {
 		try {
@@ -168,25 +170,45 @@ const ViewCampaignApplicants = () => {
 	};
 
 	// inside ViewCampaignApplicants
-	const handleSaveOne = async (applicantId) => {
-		const token = Cookies.get('AdminToken');
-		const data = editedApplications[applicantId];
-		try {
-			await axios.patch(
-				`${config.BACKEND_URL}/admin/applications/${applicantId}/status`,
-				{
-					status: data.status,
-					rejectionReason: data.rejectionReason,
-					showReasonToInfluencer: data.showReasonToInfluencer,
-				},
-				{ headers: { authorization: token } }
-			);
-			alert('Applicant updated');
-			getApplications();
-		} catch {
-			alert('Failed to save applicant');
-		}
-	};
+const handleSaveOne = async (applicantId) => {
+  const token = Cookies.get('AdminToken');
+  const data = editedApplications[applicantId];
+
+  try {
+    const res = await axios.patch(
+      `${config.BACKEND_URL}/admin/applications/${applicantId}/status`,
+      {
+        status: data.status,
+        rejectionReason: data.rejectionReason,
+        showReasonToInfluencer: data.showReasonToInfluencer,
+      },
+      { headers: { authorization: token } }
+    );
+
+    if (res.data.status === 'success') {
+      alert('✅ Applicant updated');
+    } else {
+      const msg = res.data.message || 'Unknown error';
+      if (msg.toLowerCase().includes('seat')) {
+        alert(`❌ Cannot approve. Recruiting limit full (${approvedCount} / ${recruitingLimit}).`);
+      } else {
+        alert(`❌ Failed to update: ${msg}`);
+      }
+    }
+
+    getApplications();
+  } catch (error) {
+    const msg = error?.response?.data?.message || 'Server error';
+    if (msg.toLowerCase().includes('seat')) {
+      alert(`❌ Cannot approve. Recruiting limit full (${approvedCount} / ${recruitingLimit}).`);
+    } else {
+      alert(`❌ Failed to update applicant: ${msg}`);
+    }
+    console.error(`handleSaveOne error for ID ${applicantId}:`, msg);
+  }
+};
+
+
 
 	const getApplications = async () => {
 		setloading(true);
@@ -218,11 +240,22 @@ const ViewCampaignApplicants = () => {
 				setLast(!res.data.isLastPage);
 				setLastId(res.data.nextCursor);
 				setCampaignTitle(res.data.campaignTitle);
+
+				// ✅ Add these two:
+  setRecruitingLimit(res.data.recruitingLimit);  // <-- from backend
+  setApprovedCount(res.data.approvedCount);      // <-- from backend
 			}
 		} finally {
 			setloading(false);
 		}
 	};
+
+	const calculateTotalApproved = () => {
+  return Object.values(editedApplications).filter(
+    (app) => app.status === 'Approved'
+  ).length;
+};
+
 
 	// 2. Row field update handler
 	const handleFieldChange = (applicantId, field, value) => {
@@ -236,28 +269,81 @@ const ViewCampaignApplicants = () => {
 	};
 
 	// 3. Save all in one shot
-	const saveAll = async () => {
-		const token = Cookies.get('AdminToken');
-		try {
-			await Promise.all(
-				Object.entries(editedApplications).map(([id, data]) =>
-					axios.patch(
-						`${config.BACKEND_URL}/admin/applications/${id}/status`,
-						{
-							status: data.status,
-							rejectionReason: data.rejectionReason,
-							showReasonToInfluencer: data.showReasonToInfluencer,
-						},
-						{ headers: { authorization: token } }
-					)
-				)
-			);
-			alert('All applicants updated successfully');
-			getApplications();
-		} catch (e) {
-			alert('Failed to save some changes');
-		}
-	};
+const saveAll = async () => {
+  const token = Cookies.get("AdminToken");
+  let updated = 0;
+  let failed = 0;
+  let seatFullErrors = 0;
+  let otherErrors = 0;
+
+  for (const [id, data] of Object.entries(editedApplications)) {
+    const original = applications.find((app) => app.id === id);
+
+    // Skip if nothing changed
+    const unchanged =
+      original.status === data.status &&
+      (original.rejectionReason || "") === (data.rejectionReason || "") &&
+      !!original.showReasonToInfluencer === !!data.showReasonToInfluencer;
+
+    if (unchanged) continue;
+
+    try {
+      const res = await axios.patch(
+        `${config.BACKEND_URL}/admin/applications/${id}/status`,
+        {
+          status: data.status,
+          rejectionReason: data.rejectionReason,
+          showReasonToInfluencer: data.showReasonToInfluencer,
+        },
+        { headers: { authorization: token } }
+      );
+
+      if (res.data.status === "success") {
+        updated++;
+      } else {
+        failed++;
+        if (
+          res.data.message &&
+          res.data.message.toLowerCase().includes("seats")
+        ) {
+          seatFullErrors++;
+        } else {
+          otherErrors++;
+        }
+      }
+    } catch (err) {
+      failed++;
+      const msg = err?.response?.data?.message || "";
+      if (msg.toLowerCase().includes("seats")) {
+        seatFullErrors++;
+      } else {
+        otherErrors++;
+      }
+      console.error(`❌ Error updating ID ${id}:`, msg);
+    }
+  }
+
+  // Feedback
+  if (updated > 0 && failed === 0) {
+    alert(`✅ All ${updated} applicants updated successfully.`);
+  } else if (updated > 0 && failed > 0) {
+    let message = `⚠️ ${updated} updated, ${failed} failed.\n`;
+    if (seatFullErrors) {
+      message += `❌ ${seatFullErrors} failed due to seat limit (full).\n`;
+    }
+    if (otherErrors) {
+      message += `❌ ${otherErrors} failed due to other reasons.`;
+    }
+    alert(message.trim());
+  } else {
+    alert(`❌ No updates saved. ${seatFullErrors ? "All approvals failed due to seat limit." : ""}`);
+  }
+
+  getApplications(); // refresh UI & approved count
+};
+
+
+
 
 	const paginate = async () => {
 		setloading(true);
@@ -314,6 +400,15 @@ const ViewCampaignApplicants = () => {
 			</Helmet>
 			<div className='flex justify-between items-center mb-4'>
 				<h2 className='text-xl font-semibold FontLato'>Applicants</h2>
+				<div className="inline-flex items-center gap-2 px-3 py-[6px] rounded-md bg-[#2d2d2d] border border-yellow-400 text-yellow-300 text-sm shadow FontLato">
+  <span className="font-semibold tracking-wide">Approved in DB:</span>
+  <span className="text-white">
+    {approvedCount} / {recruitingLimit}
+  </span>
+</div>
+
+
+
 				<div className='flex space-x-2'>
 					{/* New Save All button */}
 					<Button onClick={saveAll}>
