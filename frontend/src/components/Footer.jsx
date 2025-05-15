@@ -22,6 +22,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li className="mb-1">
+                <Link to="/rewards&affiliation" className="text-gray-300 hover:text-white">
+                  Rewards & Affiliation
+                </Link>
+              </li>
+              <li className="mb-1">
                 <Link to="/brand" className="text-gray-300 hover:text-white">
                   For Brands
                 </Link>
