@@ -325,7 +325,7 @@ const [campaignStatus, setCampaignStatus] = useState("Recruiting"); // or "Close
                     // onClick={() => setShowSubmitModal(true)}
                     className="bg-yellow-400 text-black font-semibold px-6 py-2 rounded-full hover:bg-yellow-500 mt-4"
                   >
-                    + Add Post
+                    Submit Content
                   </button>
                 </Link>
               )}

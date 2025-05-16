@@ -107,7 +107,7 @@ const UserApplyCampaign = () => {
                          state={{ campaignTitle: c.title }}
                            className="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition"
                          >
-                           + Add Post
+                           Submit Content
                          </Link>
                        )}
                      </td>
