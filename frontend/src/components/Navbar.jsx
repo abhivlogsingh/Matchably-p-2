@@ -66,7 +66,7 @@ const Navbar = ({ Islogin }) => {
               <Link to="/campaigns" className="hover:text-white transition">Campaigns</Link>
               <Link to="/brand" className="hover:text-white transition">For Brands</Link>
               <Link to="/influencer" className="hover:text-white transition">For Influencers</Link>
-              <Link to="/rewards&affiliation" className="hover:text-white transition">Rewards & Affiliation</Link>
+              {/* <Link to="/rewards&affiliation" className="hover:text-white transition">Rewards & Affiliation</Link> */}
               <Link to="/aboutus" className="hover:text-white transition">About Us</Link>
 
               {Islogin ? (
@@ -129,7 +129,7 @@ const Navbar = ({ Islogin }) => {
               <Link to="/campaigns" onClick={() => setIsOpen(false)} className="hover:text-white">Campaigns</Link>
               <Link to="/brand" onClick={() => setIsOpen(false)} className="hover:text-white">For Brands</Link>
               <Link to="/influencer" onClick={() => setIsOpen(false)} className="hover:text-white">For Influencers</Link>
-              <Link to="/rewards&affiliation" onClick={() => setIsOpen(false)} className="hover:text-white">Rewards & Affiliation</Link>
+              {/* <Link to="/rewards&affiliation" onClick={() => setIsOpen(false)} className="hover:text-white">Rewards & Affiliation</Link> */}
               <Link to="/aboutus" onClick={() => setIsOpen(false)} className="hover:text-white">About Us</Link>
 
               <div className="flex flex-col items-center gap-2">
