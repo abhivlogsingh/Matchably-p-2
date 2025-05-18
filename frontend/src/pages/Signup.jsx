@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState, useRef } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 import { GoogleLogin } from "@react-oauth/google";
@@ -9,8 +9,15 @@ import RecaptchaBox from "../components/RecaptchaBox";
 export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [searchParams] = useSearchParams();
+  const [referralId, setReferralId] = useState("");
   const Navigate = useNavigate();
   const recaptchaRef = useRef();
+
+  useEffect(() => {
+    const refId = searchParams.get("ref");
+    if (refId) setReferralId(refId);
+  }, [searchParams]);
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
@@ -36,6 +43,7 @@ export default function Signup() {
           email,
           password,
           recaptchaToken,
+          referrerId: referralId || undefined,
         }),
       });
 
@@ -93,6 +101,14 @@ export default function Signup() {
           <input name="name" type="text" placeholder="Name" required className="w-full p-2 rounded bg-gray-700 text-white" />
           <input name="email" type="email" placeholder="Email" required className="w-full p-2 rounded bg-gray-700 text-white" />
           <input name="password" type="password" placeholder="Password" required className="w-full p-2 rounded bg-gray-700 text-white" />
+
+          <input
+  name="referrerId"
+  defaultValue={referralId}
+  placeholder="Referral ID (optional)"
+  className="w-full p-2 rounded bg-gray-700 text-white"
+/>
+
 
           <RecaptchaBox
             ref={recaptchaRef}
