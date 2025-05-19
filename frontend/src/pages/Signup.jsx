@@ -43,7 +43,7 @@ export default function Signup() {
           email,
           password,
           recaptchaToken,
-          referrerId: referralId || undefined,
+          referrer: referralId || undefined,
         }),
       });
 
