@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 import config from "../config";
+import Cookies from "js-cookie";
 
 const ReferralRewards = () => {
   const [loading, setLoading] = useState(true);
@@ -15,47 +16,66 @@ const ReferralRewards = () => {
   }, []);
 
   const fetchReferral = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return toast.error("User not logged in");
+  const token = Cookies.get("token") || localStorage.getItem("token");
+  console.log("Referral Token:", token);
 
-    try {
-      const res = await fetch(`${config.BACKEND_URL}/user/campaigns/referral`, {
-        headers: { Authorization: token },
-      });
-      const data = await res.json();
-      if (data.status === "success") {
-        setReferralData(data);
-      } else {
-        toast.error(data.message || "Failed to fetch referral data");
-      }
-    } catch {
-      toast.error("Error loading referral info");
+  if (!token || token === "undefined" || token === "null") {
+    toast.error("User not logged in");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${config.BACKEND_URL}/user/campaigns/referral`, {
+      headers: { Authorization: token },
+    });
+    const data = await res.json();
+    console.log("Referral Data:", data);
+
+    if (data.status === "success") {
+      setReferralData(data);
+    } else {
+      toast.error(data.message || "Failed to fetch referral data");
     }
-  };
+  } catch (err) {
+    console.error("Referral Fetch Error:", err);
+    toast.error("Error loading referral info");
+  }
+};
+
 
   const fetchPoints = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return toast.error("User not logged in");
+  const token = Cookies.get("token") || localStorage.getItem("token");
+  console.log("Point Token:", token);
 
-    try {
-      const res = await fetch(`${config.BACKEND_URL}/user/campaigns/points`, {
-        headers: { Authorization: token },
-      });
-      const data = await res.json();
-      if (data.status === "success") {
-        setPointData(data);
-      } else {
-        toast.error(data.message || "Failed to fetch points data");
-      }
-    } catch {
-      toast.error("Error loading point data");
-    } finally {
-      setLoading(false);
+  if (!token || token === "undefined" || token === "null") {
+    toast.error("User not logged in");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${config.BACKEND_URL}/user/campaigns/points`, {
+      headers: { Authorization: token },
+    });
+    const data = await res.json();
+    console.log("Point Data:", data);
+
+    if (data.status === "success") {
+      setPointData(data);
+    } else {
+      toast.error(data.message || "Failed to fetch points data");
     }
-  };
+  } catch (err) {
+    console.error("Point Fetch Error:", err);
+    toast.error("Error loading point data");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleRedeem = async (tierId) => {
-    const token = localStorage.getItem("token");
+    const token = Cookies.get("token") || localStorage.getItem("token");
     if (!token) return toast.error("User not logged in");
 
     try {
