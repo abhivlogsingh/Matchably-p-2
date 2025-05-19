@@ -199,7 +199,7 @@ function Layout() {
 									Applications
 								</Link>
 								<Link
-									to='/admin/referral'
+									to='/admin/referrals'
 									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
 								>
 									Referral Logs
