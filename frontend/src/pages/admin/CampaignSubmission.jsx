@@ -56,12 +56,10 @@ useEffect(() => {
           const submissionData = submissionRes.data.data;
           setSubmission(submissionData);
 
-          const statusMap = {};
-          PLATFORMS.forEach(({ key }) => {
-            const urls = submissionData[key] || [];
-            statusMap[key] = urls.map(() => "Pending");
-          });
-          setContentStatus(statusMap);
+          setContentStatus({
+    content_status: submissionData.content_status || "Pending",
+  });
+
         } else {
           throw new Error(submissionRes.data.message || "Failed to load submission");
         }
@@ -83,40 +81,50 @@ useEffect(() => {
 }, [campaignId, email]);
 
 
-  const handleStatusChange = (platformKey, index, value) => {
-    setContentStatus(prev => ({
-      ...prev,
-      [platformKey]: prev[platformKey].map((val, idx) =>
-        idx === index ? value : val
-      ),
-    }));
-  };
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    const token = Cookies.get("AdminToken");
+    if (!token) throw new Error("Admin token missing");
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const token = Cookies.get("AdminToken");
-      if (!token) throw new Error("Admin token missing");
-
-      const res = await axios.post(
-        `${config.BACKEND_URL}/user/admin/submission/update-status`,
-        { campaignId, email, contentStatus },
-        { headers: { Authorization: token } }
-      );
-
-      if (res.data.status === "success") {
-        alert("Statuses updated!");
-        navigate(-1);
-      } else {
-        alert(res.data.message || "Failed to update status");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error saving content statuses");
-    } finally {
+    const status = contentStatus?.content_status;
+    if (!status) {
+      alert("Please select a content status.");
       setSaving(false);
+      return;
     }
-  };
+
+    const payload = {
+      campaignId,
+      email,
+      contentStatus: { content_status: status }, // ✅ match backend shape
+    };
+
+    const res = await axios.post(
+      `${config.BACKEND_URL}/user/admin/submission/update-status`,
+      payload,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+
+    if (res.data.status === "success") {
+      alert("Status updated successfully!");
+    } else {
+      alert(res.data.message || "Failed to update status");
+    }
+  } catch (err) {
+    console.error("Error while saving content status:", err);
+    alert("Something went wrong while saving status.");
+  } finally {
+    setSaving(false);
+  }
+};
+
+
+
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white">
@@ -187,76 +195,84 @@ useEffect(() => {
         <p className="text-gray-400">No submission found.</p>
       ) : (
         <div className="bg-[#1f1f1f] p-6 rounded-xl shadow-lg border border-gray-700 space-y-6">
-          {PLATFORMS.map(({ key, label, colorClass }) => (
-            <div key={key}>
-              <h2 className={`font-semibold mb-2 text-lg ${colorClass}`}>{label}</h2>
-              {submission[key]?.length > 0 ? (
-                <ul className="space-y-4">
-                  {submission[key].map((url, i) => (
-                    <li
-                      key={i}
-                      className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-800 p-4 rounded-lg border border-gray-700"
-                    >
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline break-all"
-                      >
-                        {url}
-                      </a>
-                      <select
-                        value={contentStatus[key]?.[i] || "Pending"}
-                        onChange={(e) => handleStatusChange(key, i, e.target.value)}
-                        className="bg-gray-900 border border-gray-600 px-3 py-2 rounded-lg text-white"
-                      >
-                        <option value="Pending">⏳ Pending</option>
-                        <option value="Approved">✅ Approved</option>
-                        <option value="Rejected">❌ Rejected</option>
-                      </select>
-                    </li>
-                  ))}
-                </ul>
+  <table className="w-full table-auto text-left text-white border border-gray-700 rounded-xl overflow-hidden">
+    <tbody className="divide-y divide-gray-700">
+      {PLATFORMS.map(({ key, label }) => {
+        const platform = key.split("_")[0];
+        const urls = submission[key] || [];
+        return (
+          <tr key={key} className="align-top">
+            <td className="w-40 p-3 font-semibold">{label}</td>
+            <td className="p-3 space-y-2">
+              {urls.length > 0 ? (
+                urls.map((url, i) => (
+                  <div
+                    key={i}
+                    className="bg-gray-800 text-blue-400 p-2 rounded-md border border-gray-700 break-all"
+                  >
+                    <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      {url}
+                    </a>
+                  </div>
+                ))
               ) : (
-                <p className="text-gray-500 italic">No URLs submitted</p>
+                <span className="italic text-gray-500">No URLs submitted</span>
               )}
-            </div>
-          ))}
+            </td>
+          </tr>
+        );
+      })}
 
-          {/* Reuse, Status, Submitted At */}
-          <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-gray-700 mt-6">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-green-400 w-40">Brand Reuse Allowed:</span>
-              <span className={submission.allow_brand_reuse ? "text-green-300" : "text-red-300"}>
-                {submission.allow_brand_reuse ? "Yes" : "No"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-yellow-400 w-40">Submission Status:</span>
-              <span className="capitalize">{submission.status}</span>
-            </div>
-            <div className="md:col-span-2 flex items-center gap-2">
-              <span className="font-semibold text-cyan-300">Submitted At:</span>
-              <span>
-                {new Date(submission.submitted_at).toLocaleString("en-IN", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
-              </span>
-            </div>
-          </div>
+      <tr>
+        <td className="w-40 p-3 font-semibold text-green-400">Brand Reuse</td>
+        <td className="p-3 text-green-300">
+          {submission.allow_brand_reuse ? "Yes" : "No"}
+        </td>
+      </tr>
 
-          {/* Save Button */}
-          <div className="pt-6 text-right">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
-            >
-              {saving ? "Saving..." : "Save & Update Status"}
-            </button>
-          </div>
-        </div>
+      <tr>
+  <td className="w-40 p-3 font-semibold text-yellow-400">Content Status</td>
+  <td className="p-3">
+    <select
+      value={contentStatus?.content_status || "Pending"}
+      onChange={(e) =>
+        setContentStatus((prev) => ({ ...prev, content_status: e.target.value }))
+      }
+      className="bg-gray-900 border border-gray-600 px-3 py-2 rounded-lg text-white"
+    >
+      <option value="Pending">⏳ Pending</option>
+      <option value="Approved">✅ Approved</option>
+      <option value="Rejected">❌ Rejected</option>
+    </select>
+  </td>
+</tr>
+
+
+
+      <tr>
+        <td className="w-40 p-3 font-semibold text-cyan-300">Submitted At</td>
+        <td className="p-3">
+          {new Date(submission.submitted_at).toLocaleString("en-IN", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  {/* Save Button */}
+  <div className="pt-6 text-right">
+    <button
+      onClick={handleSave}
+      disabled={saving}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
+    >
+      {saving ? "Saving..." : "Save & Update Status"}
+    </button>
+  </div>
+</div>
+
       )}
     </div>
   );

@@ -31,17 +31,27 @@ const Footer = () => {
                   For Brands
                 </Link>
               </li>
-              <li className="mb-1">
-                <Link to="/influencer" className="text-gray-300 hover:text-white">
-                  For Influencers
-                </Link>
-              </li>
+              
               {/* <li className="mb-1">
                 <Link to="/ProductFeedback" className="text-gray-300 hover:text-white">
                   Product Feedback
                 </Link>
               </li> */}
             </ul>
+          </div>
+          <div>
+            <ul>
+<li className="mb-1">
+                <Link to="/influencer" className="text-gray-300 hover:text-white">
+                  For Influencers
+                </Link>
+              </li>
+              <li className="mb-1">
+                <Link to="/aboutus" className="text-gray-300 hover:text-white">
+                  About Us 
+                </Link>
+              </li>
+              </ul>
           </div>
 
           <div>
