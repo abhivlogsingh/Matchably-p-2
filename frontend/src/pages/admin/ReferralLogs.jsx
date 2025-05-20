@@ -2,21 +2,27 @@
 import React, { useEffect, useState } from 'react';
 import config from '../../config';
 import { toast } from 'react-toastify';
+import Cookies from "js-cookie";
 
 const ReferralLogs = () => {
   const [logs, setLogs] = useState([]);
-
+  const token = Cookies.get("AdminToken") || localStorage.getItem("token");
+  console.log(token);
   useEffect(() => {
-    fetch(`${config.BACKEND_URL}/user/admin/referrals`, {
-      headers: { Authorization: localStorage.getItem('token') },
+  fetch(`${config.BACKEND_URL}/admin/referrel/points/logs`, {
+
+  headers: {
+  authorization: token,
+},
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') setLogs(data.data);
+      else toast.error(data.message);
     })
-      .then(res => res.json())
-      .then(data => {
-        if (data.status === 'success') setLogs(data.data);
-        else toast.error(data.message);
-      })
-      .catch(() => toast.error('Failed to load referral logs'));
-  }, []);
+    .catch(() => toast.error('Failed to load referral logs'));
+}, []);
+
 
   return (
     <div className='p-6 text-white'>
