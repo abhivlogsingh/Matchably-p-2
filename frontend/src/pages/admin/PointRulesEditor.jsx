@@ -13,7 +13,9 @@ const PointRulesEditor = () => {
   const fetchRules = async () => {
     try {
       const res = await fetch(`${config.BACKEND_URL}/admin/referrel/point-rules`, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {
+  authorization: token,
+},
       });
       const data = await res.json();
       if (data.status === 'success') setRules(data.rules);
@@ -30,9 +32,8 @@ const PointRulesEditor = () => {
       const res = await fetch(`${config.BACKEND_URL}/admin/referrel/point-rules`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+  authorization: token,
+},
         body: JSON.stringify({ id, value }),
       });
       const data = await res.json();
@@ -54,9 +55,8 @@ const PointRulesEditor = () => {
       const res = await fetch(`${config.BACKEND_URL}/admin/referrel/point-rules`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+  authorization: token,
+},
         body: JSON.stringify({ key: newKey.trim(), value: Number(newValue) }),
       });
 

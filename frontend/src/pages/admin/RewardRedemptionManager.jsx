@@ -3,13 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import config from '../../config';
 import { toast } from 'react-toastify';
+import Cookies from "js-cookie";
 
 const RewardRedemptionManager = () => {
   const [redemptions, setRedemptions] = useState([]);
-
+  const token = Cookies.get("AdminToken") || localStorage.getItem("token");
   const fetchRedemptions = () => {
     fetch(`${config.BACKEND_URL}/user/admin/reward-transactions`, {
-      headers: { Authorization: localStorage.getItem('token') },
+      headers: {
+  authorization: token,
+},
     })
       .then(res => res.json())
       .then(data => setRedemptions(data.data || []))

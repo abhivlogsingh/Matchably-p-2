@@ -2,20 +2,21 @@
 import React, { useState } from 'react';
 import config from '../../config';
 import { toast } from 'react-toastify';
+import Cookies from "js-cookie";
 
 const ManualPointAdjust = () => {
   const [email, setEmail] = useState('');
   const [points, setPoints] = useState(0);
   const [note, setNote] = useState('');
+  const token = Cookies.get("AdminToken") || localStorage.getItem("token");
 
   const handleSubmit = async () => {
     try {
       const res = await fetch(`${config.BACKEND_URL}/user/admin/adjust-points`, {
         method: 'POST',
         headers: {
-          Authorization: localStorage.getItem('token'),
-          'Content-Type': 'application/json',
-        },
+  authorization: token,
+},
         body: JSON.stringify({ email, points, note }),
       });
       const data = await res.json();
