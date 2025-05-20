@@ -199,6 +199,12 @@ function Layout() {
 									Applications
 								</Link>
 								<Link
+									to='/admin/points/manual-adjust'
+									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
+								>
+									User Points
+								</Link>
+								<Link
 									to='/admin/referrals'
 									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
 								>
@@ -210,12 +216,6 @@ function Layout() {
 								>
 									Point Rules Editor
 								</Link> */}
-								<Link
-									to='/admin/points/manual-adjust'
-									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
-								>
-									User Points
-								</Link>
 								{/* <Link
 									to='/admin/rewards'
 									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
