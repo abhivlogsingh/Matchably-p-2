@@ -66,25 +66,26 @@ export default function Signup() {
   };
 
   const handleGoogleSignup = async (idToken) => {
-    try {
-      const res = await fetch(`${config.BACKEND_URL}/auth/google-auth`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
+  try {
+    const res = await fetch(`${config.BACKEND_URL}/auth/google-auth`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken, referrer: referralId || null }), // ✅ update yahan
+    });
 
-      const data = await res.json();
-      if (data.status === "success") {
-        localStorage.setItem("token", data.token);
-        toast.success("Signed up with Google", { theme: "dark" });
-        Navigate("/signin");
-      } else {
-        toast.error(data.message, { theme: "dark" });
-      }
-    } catch (err) {
-      toast.error("Google signup failed", { theme: "dark" });
+    const data = await res.json();
+    if (data.status === "success") {
+      localStorage.setItem("token", data.token);
+      toast.success("Signed up with Google", { theme: "dark" });
+      Navigate("/signin");
+    } else {
+      toast.error(data.message, { theme: "dark" });
     }
-  };
+  } catch (err) {
+    toast.error("Google signup failed", { theme: "dark" });
+  }
+};
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[var(--background)]">
