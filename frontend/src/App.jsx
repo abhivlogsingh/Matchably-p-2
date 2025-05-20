@@ -33,7 +33,7 @@ import { LoaderCircle } from 'lucide-react';
 import ViewCampaignApplicants from './pages/admin/CampaignApplications';
 import ViewCampaignSubmission from './pages/admin/CampaignSubmission';
 import ReferralLogs from './pages/admin/ReferralLogs';
-import PointRulesEditor from './pages/admin/PointRulesEditor';
+// import PointRulesEditor from './pages/admin/PointRulesEditor';
 import ManualPointAdjust from './pages/admin/ManualPointAdjust';
 import RewardRedemptionManager from './pages/admin/RewardRedemptionManager';
 import AboutUs from './pages/AboutUs';
@@ -204,17 +204,17 @@ function Layout() {
 								>
 									Referral Logs
 								</Link>
-								<Link
+								{/* <Link
 									to='/admin/points/rules'
 									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
 								>
 									Point Rules Editor
-								</Link>
+								</Link> */}
 								<Link
 									to='/admin/points/manual-adjust'
 									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
 								>
-									Manual Point Adjustment
+									User Points
 								</Link>
 								<Link
 									to='/admin/rewards'
@@ -268,14 +268,14 @@ function Layout() {
           </AdminAuthChecker>
         }
       />
-      <Route
+      {/* <Route
         path='/admin/points/rules'
         element={
           <AdminAuthChecker>
             <PointRulesEditor />
           </AdminAuthChecker>
         }
-      />
+      /> */}
       <Route
         path='/admin/points/manual-adjust'
         element={
