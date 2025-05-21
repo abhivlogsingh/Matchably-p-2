@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
 import config from "../config";
@@ -18,10 +18,7 @@ const ReferralRewards = () => {
 
   const fetchReferral = async () => {
     const token = Cookies.get("token") || localStorage.getItem("token");
-    if (!token || token === "undefined" || token === "null") {
-      toast.error("User not logged in");
-      return;
-    }
+    if (!token) return toast.error("User not logged in");
 
     try {
       const res = await fetch(`${config.BACKEND_URL}/user/campaigns/referral`, {
@@ -37,7 +34,7 @@ const ReferralRewards = () => {
 
   const fetchPoints = async () => {
     const token = Cookies.get("token") || localStorage.getItem("token");
-    if (!token || token === "undefined" || token === "null") {
+    if (!token) {
       toast.error("User not logged in");
       setLoading(false);
       return;
@@ -57,9 +54,13 @@ const ReferralRewards = () => {
     }
   };
 
-  const handleRedeem = async (tierId) => {
+  const handleRedeem = async (tierId, requiredPoints) => {
     const token = Cookies.get("token") || localStorage.getItem("token");
     if (!token) return toast.error("User not logged in");
+
+    if (pointData.points < requiredPoints) {
+      return toast.info("Bhai tere pass valid points nahi hai");
+    }
 
     try {
       setRedeemLoading(tierId);
@@ -71,10 +72,11 @@ const ReferralRewards = () => {
         },
         body: JSON.stringify({ tierId }),
       });
+
       const data = await res.json();
       if (data.status === "success") {
         toast.success(data.message || "Reward requested");
-        fetchPoints(); // Refresh
+        fetchPoints();
       } else {
         toast.error(data.message || "Redeem failed");
       }
@@ -84,6 +86,7 @@ const ReferralRewards = () => {
       setRedeemLoading(null);
     }
   };
+  
 
   if (loading) return <div className="text-white text-center mt-10">Loading...</div>;
 
@@ -157,28 +160,37 @@ const ReferralRewards = () => {
       {/* Points & Redeem Section */}
       <div className="bg-[#1c1c1c] p-5 rounded-lg shadow-md">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <FaStar className="text-yellow-500" /> Your Points:{" "}
-          <span className="text-green-400 ml-1">{pointData?.points}</span>
+          <FaStar className="text-yellow-500" /> Your Points:
+          <span className="text-green-400 ml-2">{pointData?.points}</span>
         </h3>
 
-        {/* Redeemable Tiers */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {Array.isArray(pointData?.progress) && pointData.progress.map((tier) => (
-            <div key={tier._id} className="bg-[#2a2a2a] p-4 rounded shadow-md">
-              <p className="font-semibold text-lg mb-1">{tier.points} Points</p>
-              <p className="text-sm text-gray-400 mb-3">Reward: {tier.reward}</p>
-              <button
-                className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm w-full"
-                disabled={pointData.points < tier.points || redeemLoading === tier._id}
-                onClick={() => handleRedeem(tier._id)}
-              >
-                {redeemLoading === tier._id ? "Processing..." : "Redeem"}
-              </button>
-            </div>
-          ))}
+          {Array.isArray(pointData?.progress) &&
+            pointData.progress.map((tier) => {
+              const canRedeem = pointData.points >= tier.pointsRequired;
+              console.log("Point Data:", pointData)
+
+              return (
+                <div key={tier._id} className="bg-[#2a2a2a] p-4 rounded shadow-md">
+                  <p className="font-semibold text-lg mb-1">{tier.pointsRequired} Points</p>
+                  <p className="text-sm text-gray-400 mb-3">Reward: {tier.reward}</p>
+                  <button
+                    className={`px-4 py-2 rounded text-sm w-full transition-all duration-200 ${
+                      canRedeem
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-gray-600 cursor-not-allowed"
+                    }`}
+                    disabled={redeemLoading === tier._id || !canRedeem}
+                    onClick={() => handleRedeem(tier._id, tier.pointsRequired)}
+                  >
+                    {redeemLoading === tier._id ? "Processing..." : "Redeem"}
+                  </button>
+                </div>
+              );
+            })}
         </div>
 
-        {/* Point History Table */}
+        {/* Point History */}
         <h4 className="font-semibold mb-3 text-gray-200">Point History</h4>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-gray-700">
@@ -196,7 +208,7 @@ const ReferralRewards = () => {
                   <tr key={item._id || i} className="border-t border-gray-700">
                     <td className="py-2 px-4">{new Date(item.createdAt).toLocaleString()}</td>
                     <td className="py-2 px-4">{item.note}</td>
-                    <td className="py-2 px-4 capitalize">{item.source?.replace('-', ' ')}</td>
+                    <td className="py-2 px-4 capitalize">{item.source?.replace("-", " ")}</td>
                     <td className="py-2 px-4 font-semibold">{item.points}</td>
                   </tr>
                 ))

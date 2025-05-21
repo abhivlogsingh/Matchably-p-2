@@ -216,12 +216,12 @@ function Layout() {
 								>
 									Point Rules Editor
 								</Link> */}
-								{/* <Link
+								<Link
 									to='/admin/rewards'
 									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
 								>
 									Reward Redemptions Manager
-								</Link> */}
+								</Link>
 							</nav>
 						</aside>
 
