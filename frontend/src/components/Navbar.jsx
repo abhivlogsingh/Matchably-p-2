@@ -125,32 +125,32 @@ const Navbar = ({ Islogin }) => {
 
           {/* ✅ Mobile Menu Inside nav */}
           {isOpen && (
-            <div className="fixed mt-[70px] md:hidden bg-[#1a1a1a]/98 backdrop-blur-md rounded-[20px] w-[89%] min-h-[250px] text-gray-200 text-sm flex flex-col items-center justify-center gap-4 z-[999]">
-              <Link to="/" onClick={() => setIsOpen(false)} className="hover:text-white">Home</Link>
-              <Link to="/campaigns" onClick={() => setIsOpen(false)} className="hover:text-white">Campaigns</Link>
-              <Link to="/brand" onClick={() => setIsOpen(false)} className="hover:text-white">For Brands</Link>
-              <Link to="/influencer" onClick={() => setIsOpen(false)} className="hover:text-white">For Influencers</Link>
-              <Link to="/rewards&affiliation" onClick={() => setIsOpen(false)} className="hover:text-white">Rewards & Affiliation</Link>
-              <Link to="/aboutus" onClick={() => setIsOpen(false)} className="hover:text-white">About Us</Link>
+  <div className="fixed mt-[70px] md:hidden bg-[#1a1a1a]/98 backdrop-blur-md rounded-[20px] w-[89%] min-h-[250px] text-gray-200 text-sm flex flex-col items-center justify-center gap-4 z-[999]">
+    <Link to="/" onClick={() => setIsOpen(false)} className="hover:text-white">Home</Link>
+    <Link to="/campaigns" onClick={() => setIsOpen(false)} className="hover:text-white">Campaigns</Link>
+    <Link to="/brand" onClick={() => setIsOpen(false)} className="hover:text-white">For Brands</Link>
+    <Link to="/influencer" onClick={() => setIsOpen(false)} className="hover:text-white">For Influencers</Link>
+    <Link to="/rewards&affiliation" onClick={() => setIsOpen(false)} className="hover:text-white">Rewards & Affiliation</Link>
+    <Link to="/aboutus" onClick={() => setIsOpen(false)} className="hover:text-white">About Us</Link>
 
-              <div className="flex flex-col items-center gap-2">
-                {Islogin ? (
-                  <>
-                    <Link to="/myaccount" onClick={() => setIsOpen(false)} className="border border-white px-10 py-1 rounded-full hover:bg-white hover:text-black">
-                      My Account
-                    </Link>
-                    <button onClick={handleLogout} className="hover:text-white">
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <Link to="/signin" onClick={() => setIsOpen(false)} className="border border-white px-10 py-1 rounded-full hover:bg-white hover:text-black">
-                    Sign In
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
+    <div className="flex flex-col items-center gap-2">
+      {Islogin ? (
+        <>
+          {/* Instead of single My Account, show full dropdown items */}
+          <Link to="/myaccount" onClick={() => setIsOpen(false)} className="hover:text-white">Profile</Link>
+          <Link to="/UserApplyCampaign" onClick={() => setIsOpen(false)} className="hover:text-white">Applied Campaigns</Link>
+          <Link to="/referral&rewards" onClick={() => setIsOpen(false)} className="hover:text-white">Referral & Rewards</Link>
+          <button onClick={handleLogout} className="hover:text-white">Logout</button>
+        </>
+      ) : (
+        <Link to="/signin" onClick={() => setIsOpen(false)} className="border border-white px-10 py-1 rounded-full hover:bg-white hover:text-black">
+          Sign In
+        </Link>
+      )}
+    </div>
+  </div>
+)}
+
         </nav>
       </div>
     </div>
