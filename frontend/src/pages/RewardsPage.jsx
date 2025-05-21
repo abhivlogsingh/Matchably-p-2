@@ -132,6 +132,52 @@ const RewardsPage = () => {
         </div>
       </section>
 
+      {/* Points-for-Rewards Table */}
+      <section className='py-24 px-4 border-t border-gray-800'>
+        <div className='max-w-6xl mx-auto'>
+          <h2 className='text-3xl font-bold text-center mb-6'>Redeemable Rewards</h2>
+          <p className='text-center text-gray-400 mb-8'>
+            The more points you earn, the bigger the reward. Redeem for Amazon e-Gift Cards in the U.S.
+          </p>
+          <div className='overflow-x-auto'>
+            <table className='w-full text-center border border-gray-700 rounded-lg'>
+              <thead className='bg-[#121212] text-gray-300'>
+                <tr>
+                  <th className='py-3 px-6 border-b border-gray-700'>Points</th>
+                  <th className='py-3 px-6 border-b border-gray-700'>Reward</th>
+                  <th className='py-3 px-6 border-b border-gray-700'>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className='border-b border-gray-700'>
+                  <td className='py-4 px-6'>500 P</td>
+                  <td className='py-4 px-6 text-green-400 font-semibold'>$20 Amazon e-Gift Card</td>
+                  <td className='py-4 px-6 text-gray-400'>Minimum redemption level</td>
+                </tr>
+                <tr className='border-b border-gray-700'>
+                  <td className='py-4 px-6'>1,000 P</td>
+                  <td className='py-4 px-6 text-green-400 font-semibold'>$40 Amazon e-Gift Card</td>
+                  <td className='py-4 px-6 text-gray-400'>Double the rewards, double the fun</td>
+                </tr>
+                <tr className='border-b border-gray-700'>
+                  <td className='py-4 px-6'>2,000 P</td>
+                  <td className='py-4 px-6 text-green-400 font-semibold'>$90 Amazon e-Gift Card</td>
+                  <td className='py-4 px-6 text-gray-400'>+ Bonus included</td>
+                </tr>
+                <tr>
+                  <td className='py-4 px-6'>3,000 P</td>
+                  <td className='py-4 px-6 text-green-400 font-semibold'>$120 Amazon e-Gift Card</td>
+                  <td className='py-4 px-6 text-gray-400'>Best value tier</td>
+                </tr>
+              </tbody>
+            </table>
+            <p className='text-sm text-gray-400 mt-4 text-center'>
+              🚀 Tip: Redeem anytime once you hit a reward tier. No expiration on earned points.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className='py-24 px-4 border-t border-gray-800'>
         <div className='max-w-6xl mx-auto'>
