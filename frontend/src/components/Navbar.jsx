@@ -66,7 +66,7 @@ const Navbar = ({ Islogin }) => {
               <Link to="/campaigns" className="hover:text-white transition">Campaigns</Link>
               <Link to="/brand" className="hover:text-white transition">For Brands</Link>
               <Link to="/influencer" className="hover:text-white transition">For Influencers</Link>
-              {/* <Link to="/rewards&affiliation" className="hover:text-white transition">Rewards & Affiliation</Link> */}
+              <Link to="/rewards&affiliation" className="hover:text-white transition">Rewards & Affiliation</Link>
               <Link to="/aboutus" className="hover:text-white transition">About Us</Link>
 
               {Islogin ? (
