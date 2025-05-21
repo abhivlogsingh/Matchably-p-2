@@ -19,6 +19,7 @@ import React, { useEffect, useState } from 'react';
 import useAuthStore from './state/atoms';
 import MyAccount from './pages/myaccount';
 import UserApplyCampaign from './pages/userapplycampaign';
+import ReferralRewards from './pages/Referral&Rewards';
 import AddPostUrl from './pages/addposturl';
 // import { SubmitFeedback_Kbeauty, SubmitFeedback_Kfood } from "./pages/ProductFeedback";
 import CampaignDetail from './pages/CampaignDetail';
@@ -31,6 +32,10 @@ import AuthAdmin from './pages/admin/Auth';
 import { LoaderCircle } from 'lucide-react';
 import ViewCampaignApplicants from './pages/admin/CampaignApplications';
 import ViewCampaignSubmission from './pages/admin/CampaignSubmission';
+import ReferralLogs from './pages/admin/ReferralLogs';
+// import PointRulesEditor from './pages/admin/PointRulesEditor';
+import ManualPointAdjust from './pages/admin/ManualPointAdjust';
+import RewardRedemptionManager from './pages/admin/RewardRedemptionManager';
 import AboutUs from './pages/AboutUs';
 import BrandLandingPage from './pages/BrandLandingPage';
 import Influencer from './pages/influencer';
@@ -112,6 +117,14 @@ function Layout() {
 				}	
 				/>
 				<Route 
+				path='/referral&rewards'
+				element={
+					<AuthChecker isLogin={isLogin}>
+					<ReferralRewards />
+					</AuthChecker>
+				}	
+				/>
+				<Route 
 				path='/AddPostUrl/:campaignId'
 				element={
 					<AuthChecker isLogin={isLogin}>
@@ -185,6 +198,30 @@ function Layout() {
 								>
 									Applications
 								</Link>
+								<Link
+									to='/admin/points/manual-adjust'
+									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
+								>
+									User Points
+								</Link>
+								<Link
+									to='/admin/referrals'
+									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
+								>
+									Referral Logs
+								</Link>
+								{/* <Link
+									to='/admin/points/rules'
+									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
+								>
+									Point Rules Editor
+								</Link> */}
+								<Link
+									to='/admin/rewards'
+									className='block py-1 px-4 rounded-md hover:bg-gray-600 FontNoto text-[14px]'
+								>
+									Reward Redemptions Manager
+								</Link>
 							</nav>
 						</aside>
 
@@ -223,6 +260,38 @@ function Layout() {
 										</AdminAuthChecker>
 									}
 								/>
+								 <Route
+        path='/admin/referrals'
+        element={
+          <AdminAuthChecker>
+            <ReferralLogs />
+          </AdminAuthChecker>
+        }
+      />
+      {/* <Route
+        path='/admin/points/rules'
+        element={
+          <AdminAuthChecker>
+            <PointRulesEditor />
+          </AdminAuthChecker>
+        }
+      /> */}
+      <Route
+        path='/admin/points/manual-adjust'
+        element={
+          <AdminAuthChecker>
+            <ManualPointAdjust />
+          </AdminAuthChecker>
+        }
+      />
+      <Route
+        path='/admin/rewards'
+        element={
+          <AdminAuthChecker>
+            <RewardRedemptionManager />
+          </AdminAuthChecker>
+        }
+      />
 							</Routes>
 						</main>
 					</div>
