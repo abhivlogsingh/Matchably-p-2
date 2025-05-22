@@ -33,9 +33,9 @@ const RewardsPage = () => {
           >
             🎯 Start Earning Now
           </Link>
-          <p className='mt-6 text-sm text-gray-400'>
+          {/* <p className='mt-6 text-sm text-gray-400'>
             🎁 Creators redeemed over <span className='text-green-400 font-semibold'>$1,200</span> last month — 100P ≈ $5 value.
-          </p>
+          </p> */}
         </div>
       </section>
 
@@ -187,7 +187,7 @@ const RewardsPage = () => {
               ['Where can I check my points?', 'Go to My Page → Rewards for balance and activity.'],
               ['Why didn’t I get referral points?', 'Your friend must enter your ID and have an approved post.'],
               ['How long does approval take?', '1–2 business days.'],
-              ['How do I redeem?', 'Once you hit 500 P (≈ $25), the button unlocks. You’ll receive your Amazon gift code within 48h via email.'],
+              ['How do I redeem?', 'Once you hit 500 Points (≈ $20), the button unlocks. You’ll receive your Amazon gift code within 48h via email.'],
             ].map(([question, answer], i) => (
               <div
                 key={i}
@@ -216,7 +216,7 @@ const RewardsPage = () => {
           <p className='mt-4 text-sm text-gray-400'>
             Or <Link to='/campaigns' className='text-blue-400 underline'>see current campaigns</Link>
           </p>
-          <p className='mt-2 text-xs text-gray-500'>✅ Rewards are currently issued as Amazon e-Gift Cards (U.S. only).</p>
+          <p className='mt-2 text-xs text-gray-500'>✅ Rewards are currently issued as Amazon e-Gift Cards.</p>
         </div>
       </section>
     </div>

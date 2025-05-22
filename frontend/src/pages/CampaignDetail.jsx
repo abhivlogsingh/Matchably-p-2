@@ -299,9 +299,9 @@ const [campaignStatus, setCampaignStatus] = useState("Recruiting"); // or "Close
                   <strong>Recruiting:</strong> {campaign.recruiting}
                 </p>
               )} */}
-              <p className="text-[#d2d2d2] mt-[8px]">
+              {/* <p className="text-[#d2d2d2] mt-[8px]">
   <strong>Applicants:</strong> {applicantsCount} / {campaign.recruiting || "N/A"}
-</p>
+</p> */}
 <p className={`mt-2 font-semibold text-sm inline-block px-3 py-1 rounded-full 
   ${campaignStatus === "Closed" ? "bg-red-600 text-white" : "bg-green-600 text-white"}`}>
   {campaignStatus}
