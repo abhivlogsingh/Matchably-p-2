@@ -152,6 +152,9 @@ const handleSave = async () => {
         <strong className="text-white">Email:</strong> {user.email}
       </div>
       <div>
+        <strong className="text-white">Points:</strong> {user.points || 'NA'}
+      </div>
+      <div>
         <strong className="text-white">Instagram ID:</strong>{" "}
         {user.instagramId ? (
           <a
