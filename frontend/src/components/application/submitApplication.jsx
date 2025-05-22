@@ -58,9 +58,9 @@ const usStates = [
   "Wyoming",
 ];
 
-export default function SubmitApplication({ isOpen, setIsOpen,setSuccess,campaignId }) {
+export default function SubmitApplication({ isOpen, setIsOpen, setSuccess, campaignId }) {
   const { User } = useAuthStore();
-  const [loading, setloading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: User.name,
     email: User.email,
@@ -72,194 +72,176 @@ export default function SubmitApplication({ isOpen, setIsOpen,setSuccess,campaig
     instagramId: User.instagramId,
     tiktokId: User.tiktokId,
   });
-  
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setloading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const { street, city, state, zip, instagramId, tiktokId } = formData;
+    const { street, city, state, zip, instagramId, tiktokId } = formData;
 
-  // 🔒 Validate address fields
-  if (!street || !city || !state || !zip) {
-    toast.error("Please fill in all address fields.", {
-      position: "top-center",
-    });
-    setloading(false);
-    return;
-  }
-
-  // 🔒 Validate at least one social ID
-  if (!instagramId.trim() && !tiktokId.trim()) {
-    toast.error("Please provide either Instagram ID or TikTok ID.", {
-      position: "top-center",
-    });
-    setloading(false);
-    return;
-  }
-
-  try {
-    const token = Cookies.get("token") || localStorage.getItem("token");
-
-    const res = await axios.post(
-      `${config.BACKEND_URL}/user/campaigns/apply`,
-      {
-        state,
-        city,
-        phone: formData.phone,
-        address: street,
-        zip,
-        campaignId,
-        instagramId,
-        tiktokId,
-      },
-      {
-        headers: {
-          authorization: token,
-        },
-      }
-    );
-
-    if (res.data.status === "success") {
-      setIsOpen(false);
-      setSuccess(true);
-      console.log(res.data);
-      toast.success("Application submitted successfully!", {
-        position: "top-center",
-      });
-    } else {
-      toast.error(res.data.message || "Application failed.", {
-        position: "top-center",
-      });
+    // Validate address fields
+    if (!street || !city || !state || !zip) {
+      toast.error("Please fill in all address fields.", { position: "top-center" });
+      setLoading(false);
+      return;
     }
-  } catch (error) {
-    console.error(error);
-    const message = error?.response?.data?.message || "Something went wrong.";
-    toast.error(message, {
-      position: "top-center",
-    });
-  } finally {
-    setloading(false);
-  }
-};
 
+    // Validate at least one social ID
+    if (!instagramId.trim() && !tiktokId.trim()) {
+      toast.error("Please provide either Instagram ID or TikTok ID.", { position: "top-center" });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const token = Cookies.get("token") || localStorage.getItem("token");
+
+      const res = await axios.post(
+        `${config.BACKEND_URL}/user/campaigns/apply`,
+        {
+          state,
+          city,
+          phone: formData.phone,
+          address: street,
+          zip,
+          campaignId,
+          instagramId,
+          tiktokId,
+        },
+        {
+          headers: { authorization: token },
+        }
+      );
+
+      if (res.data.status === "success") {
+        setIsOpen(false);
+        setSuccess(true);
+        toast.success("Application submitted successfully!", { position: "top-center" });
+      } else {
+        toast.error(res.data.message || "Application failed.", { position: "top-center" });
+      }
+    } catch (error) {
+      console.error(error);
+      const message = error?.response?.data?.message || "Something went wrong.";
+      toast.error(message, { position: "top-center" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div
-      className={`gap-[20px] fixed top-0 right-0 h-full bg-[#303030] text-white w-full md:w-[400px] transform ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      } transition-transform duration-300 ease-in-out shadow-lg z-9999 p-6`}
-    >
-      <h2 className="text-2xl font-bold mb-8 FontNoto flex justify-between items-center w-full">
+     <div
+   className={`fixed top-0 right-0 h-full max-h-screen overflow-y-auto
+     bg-[#303030] text-white w-full md:w-[400px]
+     transform ${ isOpen ? "translate-x-0" : "translate-x-full" }
+     transition-transform duration-300 ease-in-out
+     shadow-lg z-[9999] pointer-events-auto p-6`}
+ >
+      <h2 className="text-2xl font-bold mb-6 flex justify-between items-center">
         Apply to Campaign
-        <button
-          onClick={() => setIsOpen(false)}
-          className=" text-gray-300 hover:text-white"
-        >
+        <button onClick={() => setIsOpen(false)} className="text-gray-300 hover:text-white">
           ✕
         </button>
       </h2>
-      <form
-        onSubmit={handleSubmit}
-        className=" flex flex-col justify-center items-center h-[90%] "
-      >
-        <div className="">
-        <div className="mb-3">
-  <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-    Name
-  </label>
-  <input
-    id="name"
-    type="text"
-    name="name"
-    value={formData.name}
-    disabled
-    className="w-full bg-[#484848] text-[#b4b4b4] px-3 py-2 rounded-md h-[60px] md:h-auto"
-  />
-</div>
-
-<div className="mb-3">
-  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-    Email
-  </label>
-  <input
-    id="email"
-    type="email"
-    name="email"
-    value={formData.email}
-    disabled
-    className="w-full bg-[#484848] text-[#b4b4b4] px-3 py-2 rounded-md FontLato h-[60px] md:h-auto"
-  />
-</div>
-
-<div className="mb-3">
-  <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
-    Phone Number
-  </label>
-  <input
-    id="phone"
-    type="tel"
-    name="phone"
-    value={formData.phone}
-    onChange={handleInputChange}
-    maxLength={14}
-    placeholder="(123) 456-7890"
-    className="w-full bg-[#484848] text-[#b4b4b4] px-3 py-2 rounded-md h-[60px] md:h-auto"
-  />
-</div>
-
-<div className="mb-3">
-  <label htmlFor="street" className="block text-sm font-medium text-gray-300 mb-1">
-    Street Address
-  </label>
-  <input
-    id="street"
-    type="text"
-    name="street"
-    value={formData.street}
-    onChange={handleInputChange}
-    placeholder="Street Address"
-    required
-    className="w-full bg-[#575757] px-3 py-2 rounded-md FontLato h-[60px] md:h-auto"
-  />
-</div>
-<div className="mb-1">
-  <label htmlFor="street" className="block text-sm font-medium text-gray-300 mb-1">
-   Instagram Id
-  </label>
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+        {/* Name & Email (disabled) */}
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
+            Name
+          </label>
           <input
-  type="text"
-  name="instagramId"
-  value={formData.instagramId}
-  onChange={handleInputChange}
-  placeholder="Instagram ID"
-  className="w-full bg-[#575757] px-3 py-2 mb-3 rounded-md h-[60px] md:h-auto"
-/>
-</div>
-<div className="mb-1">
-  <label htmlFor="street" className="block text-sm font-medium text-gray-300 mb-1">
-    Tiktok Id
-  </label>
-<input
-  type="text"
-  name="tiktokId"
-  value={formData.tiktokId}
-  onChange={handleInputChange}
-  placeholder="TikTok ID"
-  className="w-full bg-[#575757] px-3 py-2 mb-3 rounded-md h-[60px] md:h-auto"
-/>
-</div>
-<div>
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            disabled
+            className="w-full bg-[#484848] text-[#b4b4b4] px-3 py-2 rounded-md"
+          />
+        </div>
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            disabled
+            className="w-full bg-[#484848] text-[#b4b4b4] px-3 py-2 rounded-md"
+          />
+        </div>
+
+        {/* Contact & Address Fields */}
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
+            Phone Number
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleInputChange}
+            maxLength={14}
+            placeholder="(123) 456-7890"
+            className="w-full bg-[#484848] text-[#b4b4b4] px-3 py-2 rounded-md"
+          />
+        </div>
+        <div>
+          <label htmlFor="street" className="block text-sm font-medium text-gray-300 mb-1">
+            Street Address
+          </label>
+          <input
+            id="street"
+            name="street"
+            type="text"
+            value={formData.street}
+            onChange={handleInputChange}
+            placeholder="Street Address"
+            required
+            className="w-full bg-[#575757] px-3 py-2 rounded-md"
+          />
+        </div>
+        <div>
+          <label htmlFor="instagramId" className="block text-sm font-medium text-gray-300 mb-1">
+            Instagram ID
+          </label>
+          <input
+            id="instagramId"
+            name="instagramId"
+            type="text"
+            value={formData.instagramId}
+            onChange={handleInputChange}
+            placeholder="Instagram ID"
+            className="w-full bg-[#575757] px-3 py-2 rounded-md"
+          />
+        </div>
+        <div>
+          <label htmlFor="tiktokId" className="block text-sm font-medium text-gray-300 mb-1">
+            TikTok ID
+          </label>
+          <input
+            id="tiktokId"
+            name="tiktokId"
+            type="text"
+            value={formData.tiktokId}
+            onChange={handleInputChange}
+            placeholder="TikTok ID"
+            className="w-full bg-[#575757] px-3 py-2 rounded-md"
+          />
+        </div>
+        <div>
           <select
             name="state"
             value={formData.state}
             onChange={handleInputChange}
-            className="w-full bg-[#575757] text-white px-3 py-2 mb-3 rounded-md h-[60px] md:h-auto"
             required
+            className="w-full bg-[#575757] text-white px-3 py-2 rounded-md"
           >
             <option value="">Select State</option>
             {usStates.map((state) => (
@@ -268,37 +250,41 @@ const handleSubmit = async (e) => {
               </option>
             ))}
           </select>
-          </div>
-          
+        </div>
+        <div>
           <input
-            type="text"
             name="city"
+            type="text"
             value={formData.city}
             onChange={handleInputChange}
             placeholder="City"
-            className="w-full bg-[#575757] px-3 py-2 mb-3 rounded-md FontLato h-[60px] md:h-auto"
             required
+            className="w-full bg-[#575757] px-3 py-2 rounded-md"
           />
+        </div>
+        <div>
           <input
-  type="text"
-  name="zip"
-  value={formData.zip}
-  onChange={handleInputChange}
-  placeholder="Zip Code"
-  pattern="^\d{5}(-\d{4})?$"
-  className="w-full bg-[#575757] px-3 py-2 mb-3 rounded-md FontLato h-[60px] md:h-auto"
-  required
-/>
+            name="zip"
+            type="text"
+            value={formData.zip}
+            onChange={handleInputChange}
+            placeholder="Zip Code"
+            pattern="^\d{5}(-\d{4})?$"
+            required
+            className="w-full bg-[#575757] px-3 py-2 rounded-md"
+          />
+        </div>
 
-        </div>
-        <div className="flex justify-between mt-5 w-[100%]">
-          <button
-            type="submit"
-            className={`border-none outline-none px-4 py-2 ${loading ? "bg-[gray]" : "bg-yellow-500 hover:bg-yellow-400"} text-white text-[20px] rounded-md w-[100%] h-[60px] md:h-auto md:text-[16px]`}
-          >
-            {loading ? "loading..." : "Apply"}
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-3 text-lg rounded-md text-white ${
+            loading ? "bg-gray-500" : "bg-yellow-500 hover:bg-yellow-400"
+          }`}
+        >
+          {loading ? "Loading..." : "Apply"}
+        </button>
       </form>
     </div>
   );
