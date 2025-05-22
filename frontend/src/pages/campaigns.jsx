@@ -165,11 +165,11 @@ const CampaignList = () => {
   </p>
 
   {/* Applicants */}
-  {data.recruiting > 0 && (
+  {/* {data.recruiting > 0 && (
     <p className="text-[#d2d2d2] text-sm mb-1">
       Applicants: {data.applicantsCount || 0} / {data.recruiting}
     </p>
-  )}
+  )} */}
 
   {/* Badge */}
   <span
