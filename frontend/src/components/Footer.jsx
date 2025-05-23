@@ -31,6 +31,11 @@ const Footer = () => {
                   For Brands
                 </Link>
               </li>
+              <li className="mb-1">
+                <Link to="/influencer" className="text-gray-300 hover:text-white">
+                  For Influencers
+                </Link>
+              </li>
               
               {/* <li className="mb-1">
                 <Link to="/ProductFeedback" className="text-gray-300 hover:text-white">
@@ -42,15 +47,25 @@ const Footer = () => {
           <div>
             <ul>
 <li className="mb-1">
-                <Link to="/influencer" className="text-gray-300 hover:text-white">
-                  For Influencers
-                </Link>
-              </li>
-              <li className="mb-1">
                 <Link to="/aboutus" className="text-gray-300 hover:text-white">
                   About Us 
                 </Link>
               </li>
+              <li className="mb-1">
+      <Link to="/terms-of-service" className="text-gray-300 hover:text-white">
+        Terms of Service
+      </Link>
+    </li>
+    <li className="mb-1">
+      <Link to="/privacy-policy" className="text-gray-300 hover:text-white">
+        Privacy Policy
+      </Link>
+    </li>
+    <li className="mb-1">
+      <Link to="/do-not-sell-my-info" className="text-gray-300 hover:text-white">
+        Do Not Sell My Personal Information
+      </Link>
+    </li>
               </ul>
           </div>
 

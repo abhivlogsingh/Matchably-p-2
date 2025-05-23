@@ -42,6 +42,9 @@ import Influencer from './pages/influencer';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from "./pages/ForgotPassword";
 import RewardsPage from './pages/RewardsPage';
+import TermsofService from "./pages/TermsofService";
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import DonotSell from './pages/DonotSell';
 
 
 const URL = config.BACKEND_URL;
@@ -108,6 +111,9 @@ function Layout() {
 				/>
 				<Route path='/rewards&affiliation' element={<RewardsPage />} />
 				<Route path="/forgot-password" element={<ForgotPassword />} />
+				<Route path="/terms-of-service" element={<TermsofService />} />
+  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+  <Route path="/do-not-sell-my-info" element={<DonotSell />} />
 				<Route 
 				path='UserApplyCampaign'
 				element={
