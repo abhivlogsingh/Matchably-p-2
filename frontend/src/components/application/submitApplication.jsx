@@ -58,80 +58,107 @@ const usStates = [
   "Wyoming",
 ];
 
+const canadaProvinces = [
+  "Alberta",
+  "British Columbia",
+  "Manitoba",
+  "New Brunswick",
+  "Newfoundland and Labrador",
+  "Northwest Territories",
+  "Nova Scotia",
+  "Nunavut",
+  "Ontario",
+  "Prince Edward Island",
+  "Quebec",
+  "Saskatchewan",
+  "Yukon",
+];
+
+
 export default function SubmitApplication({ isOpen, setIsOpen, setSuccess, campaignId }) {
   const { User } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: User.name,
-    email: User.email,
-    street: "",
-    city: "",
-    phone: "",
-    state: "",
-    zip: "",
-    instagramId: User.instagramId,
-    tiktokId: User.tiktokId,
-  });
+  country: "USA", // default value
+  name: User.name,
+  email: User.email,
+  street: "",
+  city: "",
+  phone: "",
+  state: "",
+  zip: "",
+  instagramId: User.instagramId,
+  tiktokId: User.tiktokId,
+});
+
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    const { street, city, state, zip, instagramId, tiktokId } = formData;
+  const { street, city, state, zip, instagramId, tiktokId, country } = formData;
 
-    // Validate address fields
-    if (!street || !city || !state || !zip) {
-      toast.error("Please fill in all address fields.", { position: "top-center" });
-      setLoading(false);
-      return;
-    }
+  // Validate required address fields
+  if (!country) {
+    toast.error("Please select a country.", { position: "top-center" });
+    setLoading(false);
+    return;
+  }
 
-    // Validate at least one social ID
-    if (!instagramId.trim() && !tiktokId.trim()) {
-      toast.error("Please provide either Instagram ID or TikTok ID.", { position: "top-center" });
-      setLoading(false);
-      return;
-    }
+  if (!street || !city || !state || !zip) {
+    toast.error("Please fill in all address fields.", { position: "top-center" });
+    setLoading(false);
+    return;
+  }
 
-    try {
-      const token = Cookies.get("token") || localStorage.getItem("token");
+  // Validate at least one social ID
+  if (!instagramId.trim() && !tiktokId.trim()) {
+    toast.error("Please provide either Instagram ID or TikTok ID.", { position: "top-center" });
+    setLoading(false);
+    return;
+  }
 
-      const res = await axios.post(
-        `${config.BACKEND_URL}/user/campaigns/apply`,
-        {
-          state,
-          city,
-          phone: formData.phone,
-          address: street,
-          zip,
-          campaignId,
-          instagramId,
-          tiktokId,
-        },
-        {
-          headers: { authorization: token },
-        }
-      );
+  try {
+    const token = Cookies.get("token") || localStorage.getItem("token");
 
-      if (res.data.status === "success") {
-        setIsOpen(false);
-        setSuccess(true);
-        toast.success("Application submitted successfully!", { position: "top-center" });
-      } else {
-        toast.error(res.data.message || "Application failed.", { position: "top-center" });
+    const res = await axios.post(
+      `${config.BACKEND_URL}/user/campaigns/apply`,
+      {
+        country,
+        state,
+        city,
+        phone: formData.phone,
+        address: street,
+        zip,
+        campaignId,
+        instagramId,
+        tiktokId,
+      },
+      {
+        headers: { authorization: token },
       }
-    } catch (error) {
-      console.error(error);
-      const message = error?.response?.data?.message || "Something went wrong.";
-      toast.error(message, { position: "top-center" });
-    } finally {
-      setLoading(false);
+    );
+
+    if (res.data.status === "success") {
+      setIsOpen(false);
+      setSuccess(true);
+      toast.success("Application submitted successfully!", { position: "top-center" });
+    } else {
+      toast.error(res.data.message || "Application failed.", { position: "top-center" });
     }
-  };
+  } catch (error) {
+    console.error(error);
+    const message = error?.response?.data?.message || "Something went wrong.";
+    toast.error(message, { position: "top-center" });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
      <div
@@ -236,22 +263,66 @@ export default function SubmitApplication({ isOpen, setIsOpen, setSuccess, campa
           />
         </div>
         <div>
-          <select
-            name="state"
-            value={formData.state}
-            onChange={handleInputChange}
-            required
-            className="w-full bg-[#575757] text-white px-3 py-2 rounded-md"
-          >
-            <option value="">Select State</option>
-            {usStates.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </select>
-        </div>
+  <label htmlFor="country" className="block text-sm font-medium text-gray-300 mb-1">
+    Country
+  </label>
+  <select
+    name="country"
+    value={formData.country}
+    onChange={handleInputChange}
+    required
+    className="w-full bg-[#575757] text-white px-3 py-2 rounded-md"
+  >
+    <option value="USA">USA</option>
+    <option value="Canada">Canada</option>
+  </select>
+</div>
+
+{/* Conditional State/Province Dropdown */}
+{formData.country === "USA" && (
+  <div>
+    <label htmlFor="state" className="block text-sm font-medium text-gray-300 mb-1">
+      State
+    </label>
+    <select
+      name="state"
+      value={formData.state}
+      onChange={handleInputChange}
+      required
+      className="w-full bg-[#575757] text-white px-3 py-2 rounded-md"
+    >
+      <option value="">Select State</option>
+      {usStates.map((state) => (
+        <option key={state} value={state}>{state}</option>
+      ))}
+    </select>
+  </div>
+)}
+
+{formData.country === "Canada" && (
+  <div>
+    <label htmlFor="state" className="block text-sm font-medium text-gray-300 mb-1">
+      Province / Territory
+    </label>
+    <select
+      name="state"
+      value={formData.state}
+      onChange={handleInputChange}
+      required
+      className="w-full bg-[#575757] text-white px-3 py-2 rounded-md"
+    >
+      <option value="">Select Province / Territory</option>
+      {canadaProvinces.map((province) => (
+        <option key={province} value={province}>{province}</option>
+      ))}
+    </select>
+  </div>
+)}
+
         <div>
+          <label htmlFor="city" className="block text-sm font-medium text-gray-300 mb-1">
+            City
+          </label>
           <input
             name="city"
             type="text"
@@ -263,17 +334,21 @@ export default function SubmitApplication({ isOpen, setIsOpen, setSuccess, campa
           />
         </div>
         <div>
-          <input
-            name="zip"
-            type="text"
-            value={formData.zip}
-            onChange={handleInputChange}
-            placeholder="Zip Code"
-            pattern="^\d{5}(-\d{4})?$"
-            required
-            className="w-full bg-[#575757] px-3 py-2 rounded-md"
-          />
-        </div>
+  <label htmlFor="zip" className="block text-sm font-medium text-gray-300 mb-1">
+    {formData.country === "Canada" ? "Postal Code" : "ZIP Code"}
+  </label>
+  <input
+    name="zip"
+    type="text"
+    value={formData.zip}
+    onChange={handleInputChange}
+    placeholder={formData.country === "Canada" ? "A1A 1A1" : "12345"}
+    pattern={formData.country === "Canada" ? "^[A-Za-z]\\d[A-Za-z][ -]?\\d[A-Za-z]\\d$" : "^\\d{5}(-\\d{4})?$"}
+    required
+    className="w-full bg-[#575757] px-3 py-2 rounded-md"
+  />
+</div>
+
 
         {/* Submit Button */}
         <button
