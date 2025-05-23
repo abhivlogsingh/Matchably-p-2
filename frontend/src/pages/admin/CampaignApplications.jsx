@@ -28,6 +28,7 @@ const ApplicantRow = ({
 	onFieldChange,
 	onSave,
 	onDelete,
+	applications,
 }) => {
 	const { status, rejectionReason, showReasonToInfluencer } = edited;
 
@@ -46,6 +47,9 @@ const ApplicantRow = ({
 					to={`/admin/campaign-submission/${campaignId}/${encodeURIComponent(
 						applicant.email
 					)}`}
+					state={{
+    applicants: applications.map((app) => app.email), // 👈 pass all emails
+  }}
 					className='
 			  inline-flex items-center px-4 py-2
 			  bg-indigo-600 text-white text-sm font-medium
@@ -455,6 +459,7 @@ const saveAll = async () => {
 									}}
 									onRefresh={getApplications}
 									onSave={handleSaveOne}
+									applications={applications}
 								/>
 							))}
 

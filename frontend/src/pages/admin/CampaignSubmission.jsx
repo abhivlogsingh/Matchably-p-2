@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import config from "../../config";
+import { useLocation } from 'react-router-dom';
 
 const PLATFORMS = [
   { key: "instagram_urls", label: "Instagram", colorClass: "text-purple-400" },
@@ -20,6 +21,29 @@ const CampaignSubmission = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const location = useLocation();
+const applicants = location.state?.applicants || [];
+const currentIndex = applicants.findIndex((e) => e === decodeURIComponent(email));
+
+
+const goToPrevious = () => {
+  if (currentIndex > 0) {
+    const prevEmail = applicants[currentIndex - 1];
+    navigate(`/admin/campaign-submission/${campaignId}/${encodeURIComponent(prevEmail)}`, {
+      state: { applicants },
+    });
+  }
+};
+
+const goToNext = () => {
+  if (currentIndex < applicants.length - 1) {
+    const nextEmail = applicants[currentIndex + 1];
+    navigate(`/admin/campaign-submission/${campaignId}/${encodeURIComponent(nextEmail)}`, {
+      state: { applicants },
+    });
+  }
+};
+
 
   const goBack = () => navigate(-1);
 
@@ -27,6 +51,8 @@ useEffect(() => {
   if (!campaignId || !email) return;
 
   const fetchData = async () => {
+    setSubmission(null); // ✅ Clear old
+    setUser(null);       // ✅ Clear old
     setLoading(true);
     setError("");
 
@@ -34,18 +60,17 @@ useEffect(() => {
       const token = Cookies.get("AdminToken");
       if (!token) throw new Error("Admin token missing");
 
-      // ✅ 1. Always fetch userRes
+      // Fetch user
       const userRes = await axios.get(
         `${config.BACKEND_URL}/admin/users/${encodeURIComponent(email)}`,
         { headers: { Authorization: token } }
       );
+
       if (userRes.data.status === "success") {
         setUser(userRes.data.user);
-      } else {
-        console.warn("User not found:", email);
       }
 
-      // ✅ 2. Then try to fetch submissionRes
+      // Fetch submission
       try {
         const submissionRes = await axios.get(
           `${config.BACKEND_URL}/user/admin/submission/${campaignId}/${encodeURIComponent(email)}`,
@@ -55,22 +80,16 @@ useEffect(() => {
         if (submissionRes.data.status === "success") {
           const submissionData = submissionRes.data.data;
           setSubmission(submissionData);
-
           setContentStatus({
-    content_status: submissionData.content_status || "Pending",
-  });
-
-        } else {
-          throw new Error(submissionRes.data.message || "Failed to load submission");
+            content_status: submissionData.content_status || "Pending",
+          });
         }
 
       } catch (subErr) {
         console.warn("Submission fetch failed:", subErr);
-        // ❗ Don't set full error here. Let user section still show.
       }
 
     } catch (err) {
-      console.error("User fetch failed:", err);
       setError("Failed to fetch user data.");
     } finally {
       setLoading(false);
@@ -79,6 +98,7 @@ useEffect(() => {
 
   fetchData();
 }, [campaignId, email]);
+
 
 
 const handleSave = async () => {
@@ -185,6 +205,25 @@ const handleSave = async () => {
         )}
       </div>
     </div>
+          {applicants.length > 0 && (
+  <div className="flex justify-between items-center mt-8">
+    <button
+      onClick={goToPrevious}
+      disabled={currentIndex <= 0}
+      className={`px-4 py-2 rounded-lg ${currentIndex <= 0 ? 'bg-gray-600 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+    >
+      ← Previous
+    </button>
+
+    <button
+      onClick={goToNext}
+      disabled={currentIndex >= applicants.length - 1}
+      className={`px-4 py-2 rounded-lg ${currentIndex >= applicants.length - 1 ? 'bg-gray-600 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+    >
+      Next →
+    </button>
+  </div>
+)}
   </div>
 )}
 
@@ -273,11 +312,14 @@ const handleSave = async () => {
     >
       {saving ? "Saving..." : "Save & Update Status"}
     </button>
+
+    
   </div>
 </div>
 
       )}
     </div>
+    
   );
 };
 
