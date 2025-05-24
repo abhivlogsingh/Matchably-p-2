@@ -15,7 +15,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 pb-10">
           {/* Navigation */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">🧭 Navigation</h3>
+            <h3 className="text-lg font-semibold mb-2">Navigation</h3>
             <ul>
               <li><Link to="/" className="text-gray-300 hover:text-white">Home</Link></li>
               <li><Link to="/campaigns" className="text-gray-300 hover:text-white">Campaigns</Link></li>
@@ -26,7 +26,7 @@ const Footer = () => {
 
           {/* Company */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">💼 Company</h3>
+            <h3 className="text-lg font-semibold mb-2">Company</h3>
             <ul>
               <li><Link to="/aboutus" className="text-gray-300 hover:text-white">About Us</Link></li>
               <li><Link to="/rewards&affiliation" className="text-gray-300 hover:text-white">Rewards & Affiliation</Link></li>
@@ -35,7 +35,7 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">🛡️ Legal</h3>
+            <h3 className="text-lg font-semibold mb-2">Legal</h3>
             <ul>
               <li><Link to="/terms-of-service" className="text-gray-300 hover:text-white">Terms of Service</Link></li>
               <li><Link to="/privacy-policy" className="text-gray-300 hover:text-white">Privacy Policy</Link></li>
@@ -45,7 +45,7 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-2">📩 Contact</h3>
+            <h3 className="text-lg font-semibold mb-2">Contact</h3>
             <p>Email:{" "}
               <a href="mailto:info@matchably.kr" className="text-blue-500 hover:underline">
                 info@matchably.kr
